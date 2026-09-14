@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rikitoism — archive</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23c8952f'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <a href="index.html" class="brand"><span class="dot"></span>Rikitoism <small>· story worth telling</small></a>
+  <nav class="site-nav" aria-label="Main">
+    <a href="index.html">home</a>
+    <a href="me.html">me</a>
+    <a href="journal.html">journal</a>
+    <a href="memories.html">memories</a>
+    <a href="influences.html">influences</a>
+    <a href="creations.html">creations</a>
+    <a href="archive.html" class="active">archive</a>
+  </nav>
+</header>
+
+<main id="main" class="page">
+
+  <section style="margin-top:40px;">
+    <p class="eyebrow-tag">everything, in one place</p>
+    <h1>archive</h1>
+    <p class="lede">Every note, sketch, experiment, and piece of miscellaneous nonsense,
+    searchable in one long list. Type below to filter.</p>
+  </section>
+
+  <hr class="divider">
+
+  <input type="text" id="archive-search" class="search-box" placeholder="search everything... try 'physics' or 'sketch'">
+
+  <ul id="archive-list" class="archive-list"><li><span class="feed-status">loading archive...</span></li></ul>
+
+</main>
+<dialog id="archive-shaped-dialog" class="shaped-dialog"><button class="dialog-close" type="button" aria-label="Close">×</button><div id="archive-shaped-content"></div></dialog>
+
+<footer class="site-footer">
+  <span class="scribble">made with late nights &amp; questionable css</span>
+  <span>© <span id="year"></span> · <a href="index.html" class="egg-trigger" data-egg="you've reached the actual end of the archive. congratulations, i guess.">back to home</a></span>
+</footer>
+
+<script src="js/site-layout.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/archive.js"></script>
+<script src="js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+{
+  "hero": {
+    "eyebrow": "heyyyoo, sup?",
+    "title": "I'm SouL,",
+    "subtitle": "A Physics student and animation storyteller.",
+    "description": "Are you curious about me? maybe not. But i am feeling bored at 3am in the morning. So here it is, my digital footprint... A space that contains information on \"meee\" and interesting things i do.",
+    "compass": [
+      { "icon": "⚛", "label": "physics" },
+      { "icon": "✎", "label": "Philosophy" },
+      { "icon": "◉", "label": "art & animation" },
+      { "icon": "∞", "label": "questionable ideas" }
+    ],
+    "button": "Soul Who ?"
+  },
+  "ticker": ["SUPERNOVA", "λ-CDM theory", "PHYSICS, UNFORTUNATELY", "ASTRONOMY", "GOSSIPS", "TELL ME A STORY", "SUMMER", "ASKING WHY", "73? OBVIOUSLY", "WAIT FOR IT...", "CENTRAL PERK", "BAZINGA, MAYBE", "ART", "ANIMATION", "WRITING", "RABBIT HOLES"],
+  "tour": {
+    "eyebrow": "around here",
+    "title": "a quick tour, in case you're lost",
+    "cards": [
+      { "href": "me.html", "meta": "who even are you", "title": "Me", "text": "The basics, the not-so-basics, how my brain works, and a few stats I made up but stand by." },
+      { "href": "journal.html", "meta": "words, mostly unfiltered", "title": "Journal", "text": "Blogs, half-formed thoughts, and observations I felt strongly enough about to write down." },
+      { "href": "memories.html", "meta": "the good, the weird", "title": "Memories", "text": "A timeline, a few photos, and the small things I still remember for no reason." },
+      { "href": "influences.html", "meta": "rabbit holes I fell into", "title": "Influences", "text": "Physics, astronomy, art, animation, design, music — and whatever I got obsessed with this week." },
+      { "href": "creations.html", "meta": "things I've built (or broken)", "title": "Creations", "text": "You can search through everything in this website, it's a dumpyard of ideas, projects and memories." },
+      { "href": "archive.html", "meta": "a collection of everything", "title": "Archive", "text": "Current, completed, experimental, and the graveyard of things I abandoned halfway." }
+    ]
+  },
+  "notes": ["note to self: update this site more often.", "this website is a permanent work in progress, like me."],
+  "socialLinks": [
+    { "href": "https://www.instagram.com/", "icon": "◎", "className": "social-instagram", "label": "instagram" },
+    { "href": "https://www.youtube.com/", "icon": "▶", "className": "social-youtube", "label": "watch my creations" },
+    { "href": "https://www.linkedin.com/", "icon": "in", "className": "social-linkedin", "label": "professional-ish" },
+    { "href": "https://discord.com/", "icon": "☁", "className": "social-discord", "label": "discord corner" }
+  ]
+}

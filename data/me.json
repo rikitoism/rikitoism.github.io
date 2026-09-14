@@ -1,0 +1,47 @@
+{
+  "intro": {
+    "eyebrow": "the basics",
+    "title": "about me, briefly",
+    "paragraphs": [
+      "I'm someone who thinks too much, makes things too often, and finishes maybe a third of them. I like understanding how the universe works and also how to draw a decent cartoon face. These two interests coexist peacefully.",
+      "I grew up mostly online and partly outside, in that order. I care about ideas more than small talk, prefer a good question to a good answer, and I am, statistically, always in the middle of at least three books."
+    ]
+  },
+  "timeline": {
+    "eyebrow": "the whole thing, fast",
+    "title": "life in a nutshell",
+    "intro": "Every event below can be clicked open, if you're curious. Most of them are true. All of them are exaggerated slightly.",
+    "events": []
+  },
+  "thinking": {
+    "eyebrow": "the inner workings",
+    "title": "how I think",
+    "paragraphs": [
+      "My brain runs on tangents. Ask me one question and you will, within four minutes, end up somewhere about octopus cognition or the Roman aqueduct system. I think in pictures more than words, in systems more than facts, and I have an unreasonable need to understand <em>why</em> before I accept <em>what</em>.",
+      "I do my best thinking late at night, in the shower, or on long walks — never at a desk, which is inconvenient, because that's where all my notebooks are."
+    ],
+    "note": "\"half of my best ideas arrive at 1am and are gone by breakfast.\""
+  },
+  "stats": {
+    "eyebrow": "purely for fun, not science",
+    "title": "current character stats",
+    "items": [
+      ["curiosity", "dangerously high", 95, ""],
+      ["focus", "depends on the day", 45, "denim"],
+      ["sleep schedule", "theoretical concept", 30, "rose"],
+      ["overthinking", "elite tier", 90, "mustard"],
+      ["finishing side projects", "work in progress", 20, ""]
+    ]
+  },
+  "facts": {
+    "eyebrow": "a random fact generator, because why not",
+    "title": "random facts about me",
+    "items": ["I have st rong, unwavering opinions about fonts.", "I have never finished a to-do list. Not once.", "I talk to myself when debugging. It usually works.", "I own more notebooks than I have finished ideas.", "I can explain black holes but I still can't parallel park.", "My browser has approximately 47 tabs open right now.", "I once stayed up all night for a meteor shower and saw one meteor."]
+  },
+  "likes": {
+    "eyebrow": "how I am, honestly",
+    "title": "things i like / things i don't understand",
+    "liked": ["quiet places", "late-night thinking", "astronomy", "drawing", "strange ideas", "music", "making things", "learning something difficult"],
+    "confused": ["people who enjoy waking up at 5 AM", "printer drivers", "why CSS behaves like this", "where my motivation went", "group projects"]
+  }
+}

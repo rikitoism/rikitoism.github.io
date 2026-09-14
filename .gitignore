@@ -1,0 +1,7 @@
+.DS_Store
+Thumbs.db
+.vscode/
+*.log
+
+# Keep local Supabase credentials out of version control.
+js/supabase-config.local.js

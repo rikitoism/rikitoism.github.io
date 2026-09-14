@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rikitoism — admin</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+<main class="admin-shell">
+  <header class="admin-header">
+    <div>
+      <p class="eyebrow-tag">private workspace</p>
+      <h1>content admin</h1>
+      <p class="lede">One calm place to add and edit the things that make up Rikitoism.</p>
+    </div>
+    <a class="btn btn-outline" href="index.html">back to site</a>
+  </header>
+
+  <section id="admin-status" class="admin-card" aria-live="polite">
+    <h2>backend connection</h2>
+    <p id="connection-message">checking Supabase configuration...</p>
+    <p class="admin-help">Before using the editors, run <code>supabase/schema.sql</code> in your Supabase SQL editor and create <code>js/supabase-config.js</code> from the example file.</p>
+  </section>
+
+  <section id="login-panel" class="admin-card" hidden>
+    <h2>sign in</h2>
+    <form id="login-form" class="admin-form">
+      <label>Email<input type="email" name="email" autocomplete="username" required></label>
+      <label>Password<input type="password" name="password" autocomplete="current-password" required></label>
+      <button class="btn" type="submit">sign in →</button>
+      <p id="login-message" class="admin-message" role="status"></p>
+    </form>
+  </section>
+
+  <section id="dashboard" hidden>
+    <div class="admin-toolbar">
+      <div>
+        <p class="eyebrow-tag">your sections</p>
+        <h2>content dashboard</h2>
+      </div>
+      <button id="logout-button" class="btn btn-outline" type="button">sign out</button>
+    </div>
+    <div class="admin-module-grid">
+      <article class="admin-module"><span>01</span><h3>journal</h3><p>Entries, excerpts, rich body content, cover image, and publish state.</p><button class="btn btn-outline admin-module-button" type="button" data-open-editor="journal-editor">open editor →</button></article>
+      <article class="admin-module"><span>02</span><h3>memories</h3><p>Main memory cards, photo footprints, and timeline events.</p><button class="btn btn-outline admin-module-button" type="button" data-open-editor="memory-editor">open editor →</button></article>
+      <article class="admin-module"><span>03</span><h3>influences</h3><p>Interests, playlists, returning songs, and shaped-me reflections.</p><button class="btn btn-outline admin-module-button" type="button" data-open-editor="influence-editor">open editor →</button></article>
+      <article class="admin-module"><span>04</span><h3>creations</h3><p>Category, project details, visual content, links, and tags.</p><button class="btn btn-outline admin-module-button" type="button" data-open-editor="creation-editor">open editor →</button></article>
+      <article class="admin-module"><span>05</span><h3>me timeline</h3><p>Edit the life-in-a-nutshell events shown on the Me page.</p><button class="btn btn-outline admin-module-button" type="button" data-open-editor="me-timeline-editor">open editor →</button></article>
+    </div>
+  </section>
+
+  <section id="me-timeline-editor" class="admin-card editor-panel" hidden>
+    <div class="admin-toolbar"><div><p class="eyebrow-tag">fifth editor</p><h2>me timeline</h2></div><button id="new-me-timeline-event" class="btn btn-outline" type="button">new event</button></div>
+    <p class="admin-help">These events are stored in Supabase and override the starter timeline in <code>data/me.json</code>.</p>
+    <form id="me-timeline-form" class="admin-form editor-form">
+      <input type="hidden" name="id">
+      <label>Year or label<input name="year" required placeholder="202X"></label>
+      <label>Title<input name="title" required></label>
+      <label>Description<textarea name="body" rows="3"></textarea></label>
+      <label>Optional read-more description<textarea name="more" rows="4"></textarea></label>
+      <label>Optional link<input type="url" name="bodyLink" placeholder="https://... or journal.html"></label>
+      <label>Order<input name="sort_order" type="number" value="0"></label>
+      <div class="editor-actions"><button class="btn" type="submit">save event →</button><span id="me-timeline-message" class="admin-message" role="status"></span></div>
+    </form>
+    <div class="editor-list-wrap"><h3>saved Me timeline events</h3><div id="me-timeline-list-admin" class="editor-list"></div></div>
+  </section>
+
+  <section id="creation-editor" class="admin-card editor-panel" hidden>
+    <div class="admin-toolbar"><div><p class="eyebrow-tag">fourth editor</p><h2>creations</h2></div><button id="new-creation" class="btn btn-outline" type="button">new creation</button></div>
+    <form id="creation-form" class="admin-form editor-form">
+      <input type="hidden" name="id">
+      <label>Title<input name="title" required></label><label>Slug<input name="slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*"></label>
+      <label>Category<select name="category"><option value="physics-research">physics &amp; research</option><option value="writing">writing</option><option value="animation">animation</option><option value="code">code</option><option value="abandoned">abandoned</option></select></label>
+      <label>Status label<input name="status_label" placeholder="in progress, experiment, RIP"></label><label>Short description<textarea name="short_description"></textarea></label>
+      <label>Tags <span class="field-note">comma separated</span><input name="tags"></label><label>Cover image URL<input type="url" name="cover_image"></label><label>Or upload cover<input type="file" name="cover_file" accept="image/*"></label>
+      <label>Project URL<input type="url" name="project_url"></label><label>GitHub URL <span class="field-note">optional</span><input type="url" name="github_url"></label>
+      <label>Date<input type="date" name="creation_date"></label>
+      <label>Visibility<select name="status"><option value="draft">draft</option><option value="published">published</option></select></label><label><input type="checkbox" name="featured"> Featured creation</label>
+      <div><h3>Project body</h3><div id="creation-blocks" class="creation-block-editor"></div><button id="add-creation-block" class="btn btn-outline" type="button">add block</button></div>
+      <div class="editor-actions"><button class="btn" type="submit">save creation →</button><span id="creation-form-message" class="admin-message"></span></div>
+    </form>
+    <div class="editor-list-wrap"><h3>saved creations</h3><div id="creation-list-admin" class="editor-list"></div></div>
+  </section>
+
+  <section id="influence-editor" class="admin-card editor-panel" hidden>
+    <div class="admin-toolbar"><div><p class="eyebrow-tag">third editor</p><h2>influences</h2></div></div>
+    <p class="admin-help">Choose a collection, fill in its fields, and save. Delete actions require password confirmation.</p>
+    <div class="influence-admin-grid">
+      <form id="interest-form" class="admin-form editor-form"><h3>Core interest</h3><input type="hidden" name="id"><label>Meta<input name="eyebrow"></label><label>Title<input name="title" required></label><label>Description<textarea name="description"></textarea></label><label>Tags <span class="field-note">comma separated</span><input name="tags"></label><button class="btn" type="submit">save interest →</button><span id="interest-message" class="admin-message"></span></form>
+      <form id="playlist-form" class="admin-form editor-form"><h3>Playlist</h3><input type="hidden" name="id"><label>Meta<input name="eyebrow"></label><label>Name<input name="title" required></label><label>Description<textarea name="description"></textarea></label><label>Image URL<input type="url" name="image_url"></label><label>Or upload image<input type="file" name="image_file" accept="image/*"></label><label>Playlist URL<input type="url" name="playlist_url"></label><button class="btn" type="submit">save playlist →</button><span id="playlist-message" class="admin-message"></span></form>
+      <form id="song-form" class="admin-form editor-form"><h3>Returning song</h3><input type="hidden" name="id"><label>Song title<input name="title" required></label><label>Artist<input name="artist"></label><label>Note<textarea name="description"></textarea></label><label>Image URL<input type="url" name="image_url"></label><label>Or upload image<input type="file" name="image_file" accept="image/*"></label><label>Song URL<input type="url" name="song_url"></label><button class="btn" type="submit">save song →</button><span id="song-message" class="admin-message"></span></form>
+      <form id="shaped-form" class="admin-form editor-form"><h3>Thing that shaped me</h3><input type="hidden" name="id"><label>Type<input name="medium" placeholder="movie, book, anime..."></label><label>Title<input name="title" required></label><label>Short description<textarea name="short_description"></textarea></label><label>Reflection<textarea name="reflection"></textarea></label><label>Image URL<input type="url" name="image_url"></label><label>Or upload image<input type="file" name="image_file" accept="image/*"></label><label>External link<input type="url" name="link_url"></label><button class="btn" type="submit">save influence →</button><span id="shaped-message" class="admin-message"></span></form>
+    </div>
+    <div id="influence-admin-lists" class="editor-list-wrap"></div>
+  </section>
+
+  <section id="journal-editor" class="admin-card editor-panel" hidden>
+    <div class="admin-toolbar">
+      <div>
+        <p class="eyebrow-tag">first editor</p>
+        <h2>journal entries</h2>
+      </div>
+      <button id="new-journal-entry" class="btn btn-outline" type="button">new entry</button>
+    </div>
+    <form id="journal-form" class="admin-form editor-form">
+      <input type="hidden" name="id">
+      <label>Title<input name="title" required></label>
+      <label>Slug<input name="slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="a-quiet-thought"></label>
+      <label>Excerpt<textarea name="excerpt" rows="3"></textarea></label>
+      <label>Body <span class="field-note">HTML is supported for now; the visual editor will be added without changing saved content.</span><textarea name="body" rows="12" placeholder="<p>Write the full journal entry here...</p>"></textarea></label>
+      <label>Cover image URL<input type="url" name="cover_image" placeholder="https://..."></label>
+      <label>Status<select name="status"><option value="draft">draft</option><option value="published">published</option></select></label>
+      <div class="editor-actions"><button class="btn" type="submit">save entry →</button><span id="journal-form-message" class="admin-message" role="status"></span></div>
+    </form>
+    <div class="editor-list-wrap">
+      <h3>saved entries</h3>
+      <div id="journal-entry-list" class="editor-list"><p class="admin-help">Connect Supabase to load saved entries.</p></div>
+    </div>
+  </section>
+
+  <section id="memory-editor" class="admin-card editor-panel" hidden>
+    <div class="admin-toolbar">
+      <div><p class="eyebrow-tag">second editor</p><h2>memories</h2></div>
+      <button id="new-memory" class="btn btn-outline" type="button">new memory</button>
+    </div>
+    <form id="memory-form" class="admin-form editor-form">
+      <input type="hidden" name="id">
+      <label>Title<input name="title" required></label>
+      <label>Slug<input name="slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="the-night-sky"></label>
+      <label>Description <span class="field-note">maximum 100 words</span><textarea name="description" rows="3"></textarea></label>
+      <label>Main image URL<input type="url" name="cover_image" placeholder="https://..."></label>
+      <label>Or upload main image<input type="file" name="cover_file" accept="image/*"></label>
+      <label>Status<select name="status"><option value="draft">draft</option><option value="published">published</option></select></label>
+      <div>
+        <h3>Photos inside this memory</h3>
+        <div id="memory-photo-fields" class="admin-form"></div>
+        <button id="add-memory-photo" class="btn btn-outline" type="button">add photo</button>
+      </div>
+      <div class="editor-actions"><button class="btn" type="submit">save memory →</button><span id="memory-form-message" class="admin-message" role="status"></span></div>
+    </form>
+    <div class="editor-list-wrap"><h3>saved memories</h3><div id="memory-list-admin" class="editor-list"></div></div>
+    <hr class="divider">
+    <div class="admin-toolbar"><div><p class="eyebrow-tag">memory timeline</p><h2>events</h2></div><button id="new-timeline-event" class="btn btn-outline" type="button">new event</button></div>
+    <form id="timeline-form" class="admin-form editor-form">
+      <input type="hidden" name="id">
+      <label>Date or label<input name="date_label" required placeholder="summer 2026"></label>
+      <label>Title<input name="title" required></label>
+      <label>Initial description <span class="field-note">maximum 40 words; keep the timeline compact</span><textarea name="description" rows="3"></textarea></label>
+      <label>Optional read-more description<textarea name="more_description" rows="4"></textarea></label>
+      <label>Status<select name="status"><option value="published">published</option><option value="draft">draft</option></select></label>
+      <div class="editor-actions"><button class="btn" type="submit">save event →</button><span id="timeline-form-message" class="admin-message" role="status"></span></div>
+    </form>
+    <div class="editor-list-wrap"><h3>saved timeline events</h3><div id="timeline-list-admin" class="editor-list"></div></div>
+  </section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>
