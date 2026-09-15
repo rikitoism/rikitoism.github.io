@@ -1,47 +1,67 @@
 {
   "intro": {
-    "eyebrow": "the basics",
-    "title": "about me, briefly",
+    "eyebrow": "boring stuff",
+    "title": "So, who am I?",
     "paragraphs": [
-      "I'm someone who thinks too much, makes things too often, and finishes maybe a third of them. I like understanding how the universe works and also how to draw a decent cartoon face. These two interests coexist peacefully.",
-      "I grew up mostly online and partly outside, in that order. I care about ideas more than small talk, prefer a good question to a good answer, and I am, statistically, always in the middle of at least three books."
+      "My name is Rudra, and I’m from Lucknow, Uttar Pradesh, India. I am currently pursuing an undergraduate degree in Physics (Hons.) from UPES, Dehradun. Outside my academics, I experiment with illustration, animation, philosophy, stories, and scripts. I tend to be observant and curious to understand things, and I enjoy exploring ideas that intrigue me. Interestingly, I was part of the moderation team of one of India’s most active Discord community servers, and I built this website in one day using generic AI because I was bored.",
+      "Honestly, I also don't know who I am. Someone who always has something going on in his mind, or someone who listens to songs 24×7 and stays distracted. Someone who wonders about everything and always stays curious, or someone who, out of the blue, started learning animation and writing stories. Someone with philosophical perspectives, or someone who likes to observe people without judging them. Someone who hates this world for being as it is, or someone who loves it for its beauty and complexity."
     ]
   },
   "timeline": {
-    "eyebrow": "the whole thing, fast",
-    "title": "life in a nutshell",
-    "intro": "Every event below can be clicked open, if you're curious. Most of them are true. All of them are exaggerated slightly.",
+    "eyebrow": "whoa, i don't even remember half of this stuff",
+    "title": "my life in a nutshell",
+    "intro": "if you're curious, most of them are true. All of them are exaggerated slightly.",
     "events": []
   },
   "thinking": {
-    "eyebrow": "the inner workings",
+    "eyebrow": "a little more on me",
     "title": "how I think",
     "paragraphs": [
-      "My brain runs on tangents. Ask me one question and you will, within four minutes, end up somewhere about octopus cognition or the Roman aqueduct system. I think in pictures more than words, in systems more than facts, and I have an unreasonable need to understand <em>why</em> before I accept <em>what</em>.",
-      "I do my best thinking late at night, in the shower, or on long walks — never at a desk, which is inconvenient, because that's where all my notebooks are."
+      "At times i think about most stupid things, and at times I think about the most complex things. What I dont like to think about are the things I have no cntrol over and it still affects me. I like to keep myself distracted most of the time, coz sometimes i get anxious and awkward in unfamiliar and social situations.",
+      "I do my best thinking late at night, overthinking about things that are not even that important or some random useless thing."
     ],
-    "note": "\"half of my best ideas arrive at 1am and are gone by breakfast.\""
+    "note": "\"half of my best ideas arrive at 2am and are gone by 6am.\""
   },
   "stats": {
-    "eyebrow": "purely for fun, not science",
-    "title": "current character stats",
+    "eyebrow": "tried to quantify myself",
+    "title": "character stats",
     "items": [
-      ["curiosity", "dangerously high", 95, ""],
-      ["focus", "depends on the day", 45, "denim"],
-      ["sleep schedule", "theoretical concept", 30, "rose"],
-      ["overthinking", "elite tier", 90, "mustard"],
-      ["finishing side projects", "work in progress", 20, ""]
+      ["Openness to Experience", "dangerously high", 80, ""],
+      ["Conscientiousness", "procrastinator", 30, "denim"],
+      ["Extraversion", "theoretical concept", 10, "rose"],
+      ["Agreeableness", "ppl say it's a bad trait idk", 95, "mustard"],
+      ["Neuroticism", "emotionally balanced", 85, ""],
+      ["sleep schedule", "it's a myth guyz", 1, "purple"]
     ]
   },
   "facts": {
     "eyebrow": "a random fact generator, because why not",
     "title": "random facts about me",
-    "items": ["I have st rong, unwavering opinions about fonts.", "I have never finished a to-do list. Not once.", "I talk to myself when debugging. It usually works.", "I own more notebooks than I have finished ideas.", "I can explain black holes but I still can't parallel park.", "My browser has approximately 47 tabs open right now.", "I once stayed up all night for a meteor shower and saw one meteor."]
+    "items": [
+      "I'm a professional music listener. By professional, I mean I listen to music approximately 24×7 and receive absolutely no salary for it. Humanity really needs to rethink its economic system.", 
+      "I have never finished a to-do list.", "I talk to myself more than I talk to others.", 
+      "There was a time when i used to study 14 hours a day and ironanically there was also a time when i used tto sleep 14 hours a day, both were exhausting and lasted for 3 months in my life.", 
+      "I have the habit of starting projects I never finish.", 
+      "I like cold coffee.", 
+      "My personality type is INTP, which is a fancy way of saying I overthink everything.", 
+      "I have a habit of overthinking and overanalyzing things, which can be both a blessing and a curse.", 
+      "I have a love-hate relationship with social media.", 
+      "I have a tendency to procrastinate, but I also have bursts of productivity that can be quite intense.", 
+      "I am someone who is emotionally detached and feel empathetic toward people who are genuinely trying their best at the same time.", 
+      "I have a tendency to get lost in my own thoughts, create scenario and fantasies in my head, daydreaming about random things and can sometimes be oblivious to my surroundings.", 
+      "I have a habit of overanalyzing social interactions and replaying conversations in my mind.", 
+      "I have a habit of collecting interesting books related to philosophy, psychology and cosmology even if I don't always read them all.", 
+      "I have a fascination with the human mind and often explore topics related to psychology and sociology.",
+      "I am intrigued by the strange ways people develop completely opposite opinions while looking at the exact same event.",
+      "I tend to question things quite a lot. Authority, opinions, traditions, philosophy, political narratives, my own assumptions... basically anything that starts with “everyone knows that…",
+      "I don't speak a lot in front of random people but I can talk endlessly about meaningless things when I am with people that are comfortable with who I am and don't judge me for being weird.",
+      "Sometimes I truly hate this world for what it is. For its cruelty, hypocrisy, selective compassion, superiority complex, and how humans generalize a situation when it doesn't fit their narrative using a trivial example that satisfies their biases."
+    ]
   },
   "likes": {
-    "eyebrow": "how I am, honestly",
+    "eyebrow": "lastly one more list",
     "title": "things i like / things i don't understand",
-    "liked": ["quiet places", "late-night thinking", "astronomy", "drawing", "strange ideas", "music", "making things", "learning something difficult"],
-    "confused": ["people who enjoy waking up at 5 AM", "printer drivers", "why CSS behaves like this", "where my motivation went", "group projects"]
+    "liked": ["quiet places", "late-night thinking", "astronomy", "animation", "sitcoms", "music", "cats", "tea & gossip"],
+    "confused": ["people who enjoy waking up at 5 AM", "humans", "people with toxic relationships", "where my motivation went", "group projects"]
   }
 }
