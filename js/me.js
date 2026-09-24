@@ -4,11 +4,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!response.ok) throw new Error(`Me data request failed: ${response.status}`);
   const data = await response.json();
   const client = window.soulSupabase?.client;
-  if (client) {
-    const { data: setting, error } = await client.from('site_settings').select('value').eq('key', 'me_timeline').maybeSingle();
-    if (error) console.error('Me timeline query failed:', error);
-    data.timeline = { ...data.timeline, ...(setting?.value || {}), events: setting?.value?.events || [] };
-  }
+  const timelineSetting = client
+    ? client.from('site_settings').select('value').eq('key', 'me_timeline').maybeSingle()
+    : Promise.resolve({ data: null, error: null });
 
   const intro = document.querySelector('[data-me-intro]');
   intro.querySelector('.eyebrow-tag').textContent = data.intro.eyebrow;
@@ -18,45 +16,54 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   const timeline = document.querySelector('[data-me-timeline]');
-  timeline.querySelector('.eyebrow-tag').textContent = data.timeline.eyebrow;
-  timeline.querySelector('h2').textContent = data.timeline.title;
-  timeline.querySelector('.block-intro').textContent = data.timeline.intro;
-  const timelineList = timeline.querySelector('.timeline');
-  timelineList.dataset.start = data.timeline.events[0]?.year || '';
-  timelineList.dataset.end = data.timeline.events[data.timeline.events.length - 1]?.year || '';
-  timelineList.innerHTML = data.timeline.events.map((event, index) => `
-    <li style="--timeline-index:${index}">
-      <button class="timeline-dot" type="button" aria-label="Show ${event.year}: ${event.title}"></button>
-      <div class="timeline-detail">
-        <span class="t-year">${event.year}</span>
-        <span class="t-title">${event.title}</span>
-        <p class="t-body">${event.body}${event.bodyLink ? ` <a href="${event.bodyLink}">open related page →</a>` : ''}</p>
-        ${event.more ? `<details class="t-expand"><summary>read more</summary><p class="t-more">${event.more}</p></details>` : ''}
-      </div>
-    </li>`).join('');
-  timelineList.insertAdjacentHTML('afterbegin', `
-    <span class="timeline-endpoint timeline-start">${timelineList.dataset.start}</span>
-    <span class="timeline-endpoint timeline-end">${timelineList.dataset.end}</span>`);
-  const timelineItems = timelineList.querySelectorAll('li');
-  if (timelineItems.length) timelineItems[0].classList.add('is-active');
-  timelineItems.forEach((item) => {
-    const activate = () => {
-      timelineItems.forEach((entry) => entry.classList.toggle('is-active', entry === item));
-    };
-    item.addEventListener('mouseenter', activate);
-    item.addEventListener('focusin', () => {
-      activate();
+  const renderTimeline = (timelineData) => {
+    timeline.querySelector('.eyebrow-tag').textContent = timelineData.eyebrow;
+    timeline.querySelector('h2').textContent = timelineData.title;
+    timeline.querySelector('.block-intro').textContent = timelineData.intro;
+    const timelineList = timeline.querySelector('.timeline');
+    timelineList.dataset.start = timelineData.events[0]?.year || '';
+    timelineList.dataset.end = timelineData.events[timelineData.events.length - 1]?.year || '';
+    timelineList.innerHTML = timelineData.events.map((event, index) => `
+      <li style="--timeline-index:${index}">
+        <button class="timeline-dot" type="button" aria-label="Show ${event.year}: ${event.title}"></button>
+        <div class="timeline-detail">
+          <span class="t-year">${event.year}</span>
+          <span class="t-title">${event.title}</span>
+          <p class="t-body">${event.body}${event.bodyLink ? ` <a href="${event.bodyLink}">open related page →</a>` : ''}</p>
+          ${event.more ? `<details class="t-expand"><summary>read more</summary><p class="t-more">${event.more}</p></details>` : ''}
+        </div>
+      </li>`).join('');
+    timelineList.insertAdjacentHTML('afterbegin', `
+      <span class="timeline-endpoint timeline-start">${timelineList.dataset.start}</span>
+      <span class="timeline-endpoint timeline-end">${timelineList.dataset.end}</span>`);
+    const timelineItems = timelineList.querySelectorAll('li');
+    timelineItems.forEach((item) => {
+      const activate = () => {
+        timelineItems.forEach((entry) => entry.classList.toggle('is-active', entry === item));
+      };
+      item.querySelector('.timeline-dot').addEventListener('focusin', activate);
+      item.querySelector('.timeline-dot').addEventListener('click', activate);
     });
-    item.querySelector('.timeline-dot').addEventListener('click', activate);
-  });
-  if ('IntersectionObserver' in window) {
-    const timelineObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => entry.target.classList.toggle('is-visible', entry.isIntersecting));
-    }, { threshold: 0.35 });
-    timelineItems.forEach((item) => timelineObserver.observe(item));
-  } else {
-    timelineItems.forEach((item) => item.classList.add('is-visible'));
-  }
+    if ('IntersectionObserver' in window) {
+      const timelineObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => entry.target.classList.toggle('is-visible', entry.isIntersecting));
+      }, { threshold: 0.35 });
+      timelineItems.forEach((item) => timelineObserver.observe(item));
+    } else {
+      timelineItems.forEach((item) => item.classList.add('is-visible'));
+    }
+  };
+  renderTimeline(data.timeline);
+  timelineSetting.then(({ data: setting, error }) => {
+    if (error) {
+      console.error('Me timeline query failed:', error);
+      return;
+    }
+    if (setting?.value) {
+      data.timeline = { ...data.timeline, ...setting.value, events: setting.value.events || [] };
+      renderTimeline(data.timeline);
+    }
+  }).catch((error) => console.error('Me timeline request failed:', error));
 
   const thinking = document.querySelector('[data-me-thinking]');
   thinking.querySelector('.eyebrow-tag').textContent = data.thinking.eyebrow;

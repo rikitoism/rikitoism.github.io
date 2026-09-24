@@ -17,18 +17,18 @@
     "eyebrow": "around here",
     "title": "a quick tour, in case you're lost",
     "cards": [
-      { "href": "me.html", "meta": "who even are you", "title": "Me", "text": "The basics, the not-so-basics, how my brain works, and a few stats I made up but stand by." },
-      { "href": "journal.html", "meta": "words, mostly unfiltered", "title": "Journal", "text": "Blogs, half-formed thoughts, and observations I felt strongly enough about to write down." },
-      { "href": "memories.html", "meta": "the good, the weird", "title": "Memories", "text": "A timeline, a few photos, and the small things I still remember for no reason." },
-      { "href": "influences.html", "meta": "rabbit holes I fell into", "title": "Influences", "text": "Physics, astronomy, art, animation, design, music — and whatever I got obsessed with this week." },
-      { "href": "creations.html", "meta": "things I've built (or broken)", "title": "Creations", "text": "You can search through everything in this website, it's a dumpyard of ideas, projects and memories." },
-      { "href": "archive.html", "meta": "a collection of everything", "title": "Archive", "text": "Current, completed, experimental, and the graveyard of things I abandoned halfway." }
+      { "href": "me.html", "meta": "who even are you", "title": "I, Me & Myself", "text": "here you will find little bit of information about me, my world and what exactly i think of myself." },
+      { "href": "journal.html", "meta": "words, mostly unfiltered", "title": "Journal", "text": "Blogs, thoughts, perspectives and a lot of think that goes on inside my head, so if you like you can read it." },
+      { "href": "memories.html", "meta": "the good, the weird", "title": "Memories", "text": "Life around me has always been interesting, and i hope it always will be, coz these memories never die(hopefully)." },
+      { "href": "influences.html", "meta": "rabbit holes I fell into", "title": "Influences", "text": "All my life i have been obsessed over music, books, stories and movies... these are the things that shaped me for who i am today." },
+      { "href": "creations.html", "meta": "things I've built (or broken)", "title": "Creations", "text": "That urge to make something unique, i hope i will do that someone but till then these are projects i worked on." },
+      { "href": "archive.html", "meta": "a collection of everything", "title": "Archive", "text": "You can search through everything in this website, it's a dumpyard of ideas, projects and memories." }
     ]
   },
-  "notes": ["note to self: update this site more often.", "this website is a permanent work in progress, like me."],
+  "notes": ["they say-You can't be kind to everyone... i can and i will be", "They got my story wrong, coz it was not me who told them. This time i will write it myself and i will be the storyteller."],
   "socialLinks": [
-    { "href": "https://www.instagram.com/", "icon": "◎", "className": "social-instagram", "label": "instagram" },
-    { "href": "https://www.youtube.com/", "icon": "▶", "className": "social-youtube", "label": "watch my creations" },
+    { "href": "https://www.instagram.com/rikitoism", "icon": "◎", "className": "social-instagram", "label": "instagram" },
+    { "href": "https://www.youtube.com/@ispeaksoul", "icon": "▶", "className": "social-youtube", "label": "watch my creations" },
     { "href": "https://www.linkedin.com/", "icon": "in", "className": "social-linkedin", "label": "professional-ish" },
     { "href": "https://discord.com/", "icon": "☁", "className": "social-discord", "label": "discord corner" }
   ]

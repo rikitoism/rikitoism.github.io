@@ -17,7 +17,7 @@
   const active = (pages.find(([file]) => file === current) || ['index.html', 'home'])[1];
   const links = pages.filter(([file]) => !file.includes('-entry') && !file.startsWith('influence-'));
   const nav = links.map(([file, label]) => `<a href="${file}"${label === active ? ' class="active"' : ''}>${label}</a>`).join('');
-  const header = `<header class="site-header"><a href="index.html" class="brand"><span class="dot"></span>Rikitoism <small>· story worth telling</small></a><nav class="site-nav" aria-label="Main">${nav}</nav></header>`;
+  const header = `<header class="site-header"><a href="index.html" class="brand"><span class="dot"></span>Rikitoism <small>· story worth telling</small></a><button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open navigation"><span></span><span></span><span></span></button><nav class="site-nav" id="site-nav" aria-label="Main">${nav}</nav></header>`;
   const footer = '<footer class="site-footer"><span class="scribble">made with late nights &amp; questionable css</span><span>© <span id="year"></span> · <a href="archive.html">everything, archived</a></span></footer>';
   const existingHeader = document.querySelector('header.site-header');
   const existingFooter = document.querySelector('footer.site-footer');
@@ -27,4 +27,26 @@
   else document.body.insertAdjacentHTML('beforeend', footer);
   const year = document.getElementById('year');
   if (year) year.textContent = new Date().getFullYear();
+
+  const toggle = document.querySelector('.nav-toggle');
+  const navigation = document.querySelector('.site-nav');
+  if (!toggle || !navigation) return;
+  const closeNavigation = () => {
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-label', 'Open navigation');
+    navigation.classList.remove('is-open');
+  };
+  toggle.addEventListener('click', () => {
+    const isOpen = toggle.getAttribute('aria-expanded') === 'true';
+    toggle.setAttribute('aria-expanded', String(!isOpen));
+    toggle.setAttribute('aria-label', isOpen ? 'Open navigation' : 'Close navigation');
+    navigation.classList.toggle('is-open', !isOpen);
+  });
+  navigation.querySelectorAll('a').forEach((link) => link.addEventListener('click', closeNavigation));
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeNavigation();
+  });
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 720) closeNavigation();
+  }, { passive: true });
 })();
