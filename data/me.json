@@ -26,7 +26,7 @@
     "eyebrow": "tried to quantify myself",
     "title": "character stats",
     "items": [
-      ["Openness to Experience", "dangerously high", 80, ""],
+      ["Openness to Experience", "every morning i need something new", 80, ""],
       ["Conscientiousness", "procrastinator", 30, "denim"],
       ["Extraversion", "theoretical concept", 10, "rose"],
       ["Agreeableness", "ppl say it's a bad trait idk", 95, "mustard"],
@@ -38,6 +38,7 @@
     "eyebrow": "a random fact generator, because why not",
     "title": "random facts about me",
     "items": [
+      "attachment type - anxious avoidant ",
       "I'm a professional music listener. By professional, I mean I listen to music approximately 24×7 and receive absolutely no salary for it. Humanity really needs to rethink its economic system.", 
       "I have never finished a to-do list.", "I talk to myself more than I talk to others.", 
       "There was a time when i used to study 14 hours a day and ironanically there was also a time when i used tto sleep 14 hours a day, both were exhausting and lasted for 3 months in my life.", 
@@ -62,6 +63,6 @@
     "eyebrow": "lastly one more list",
     "title": "things i like / things i don't understand",
     "liked": ["quiet places", "late-night thinking", "astronomy", "animation", "sitcoms", "music", "cats", "tea & gossip"],
-    "confused": ["people who enjoy waking up at 5 AM", "humans", "people with toxic relationships", "where my motivation went", "group projects"]
+    "confused": ["people who enjoy waking up at 5 AM", "humans", "people with transactional relationships", "where my motivation went", "group projects"]
   }
 }
