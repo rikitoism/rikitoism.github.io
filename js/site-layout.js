@@ -11,6 +11,7 @@
     ['influence-songs.html', 'influences'],
     ['creations.html', 'creations'],
     ['creation-entry.html', 'creations'],
+    ['guestbook.html', 'guestbook'],
     ['archive.html', 'archive']
   ];
   const current = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
@@ -27,6 +28,14 @@
   else document.body.insertAdjacentHTML('beforeend', footer);
   const year = document.getElementById('year');
   if (year) year.textContent = new Date().getFullYear();
+
+  window.rikitoMarkdownReady = new Promise((resolve, reject) => {
+    const renderer = document.createElement('script');
+    renderer.src = 'js/markdown-content.js';
+    renderer.onload = resolve;
+    renderer.onerror = () => reject(new Error('Could not load the Markdown renderer.'));
+    document.head.appendChild(renderer);
+  });
 
   const toggle = document.querySelector('.nav-toggle');
   const navigation = document.querySelector('.site-nav');

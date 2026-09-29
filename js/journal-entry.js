@@ -55,8 +55,25 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const body = document.createElement('div');
   body.className = 'journal-entry-body';
-  body.innerHTML = data.body?.html || '<p>This entry has no body yet.</p>';
+  if (typeof data.body?.markdown === 'string') {
+    const rendered = window.marked?.parse ? window.marked.parse(data.body.markdown) : null;
+    body.innerHTML = rendered && window.DOMPurify?.sanitize
+      ? window.DOMPurify.sanitize(rendered)
+      : escapeHtml(data.body.markdown).replace(/\n/g, '<br>');
+  } else if (typeof data.body?.html === 'string' && window.DOMPurify?.sanitize) {
+    body.innerHTML = window.DOMPurify.sanitize(data.body.html);
+  } else if (typeof data.body?.html === 'string') {
+    body.textContent = data.body.html;
+  } else {
+    body.innerHTML = '<p>This entry has no body yet.</p>';
+  }
   container.appendChild(body);
+
+  function escapeHtml(value) {
+    const element = document.createElement('span');
+    element.textContent = value;
+    return element.innerHTML;
+  }
 
   function showError(message) {
     container.replaceChildren();

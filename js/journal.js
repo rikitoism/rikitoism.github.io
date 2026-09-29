@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', async () => {
+  await window.rikitoMarkdownReady;
+  await window.rikitoMarkdown.ensure().catch(() => {});
   const feed = document.getElementById('journal-feed');
   const supabaseState = window.soulSupabase;
   if (!feed || !supabaseState?.client) {
@@ -40,8 +42,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const title = document.createElement('h3');
     title.textContent = entry.title;
 
-    const excerpt = document.createElement('p');
-    excerpt.textContent = entry.excerpt || 'A thought from the journal.';
+    const excerpt = document.createElement('div');
+    excerpt.className = 'markdown-copy';
+    window.rikitoMarkdown.set(excerpt, entry.excerpt || 'A thought from the journal.', true);
 
     const link = document.createElement('a');
     link.className = 'btn btn-outline';

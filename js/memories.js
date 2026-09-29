@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', async () => {
+  await window.rikitoMarkdownReady;
+  await window.rikitoMarkdown.ensure().catch(() => {});
   const memoryList = document.getElementById('memory-list');
   const timeline = document.getElementById('memory-timeline');
   const client = window.soulSupabase?.client;
@@ -30,15 +32,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   } else {
     timeline.replaceChildren(...events.map((event) => {
       const item = document.createElement('li');
-      item.innerHTML = `<span class="t-year"></span><span class="t-title"></span><p class="t-body"></p>`;
+      item.innerHTML = `<span class="t-year"></span><span class="t-title"></span><div class="t-body"></div>`;
       item.querySelector('.t-year').textContent = event.date_label;
       item.querySelector('.t-title').textContent = event.title;
-      item.querySelector('.t-body').textContent = event.description;
+      window.rikitoMarkdown.set(item.querySelector('.t-body'), event.description);
       if (event.more_description) {
         const details = document.createElement('details');
         details.className = 't-expand';
-        details.innerHTML = '<summary>read more</summary><p class="t-more"></p>';
-        details.querySelector('.t-more').textContent = event.more_description;
+        details.innerHTML = '<summary>read more</summary><div class="t-more"></div>';
+        window.rikitoMarkdown.set(details.querySelector('.t-more'), event.more_description);
         item.appendChild(details);
       }
       return item;

@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', async () => {
+  await window.rikitoMarkdownReady;
+  await window.rikitoMarkdown.ensure().catch(() => {});
   document.body.classList.add('me-page');
   const response = await fetch('data/me.json', { cache: 'no-store' });
   if (!response.ok) throw new Error(`Me data request failed: ${response.status}`);
@@ -12,27 +14,56 @@ document.addEventListener('DOMContentLoaded', async () => {
   intro.querySelector('.eyebrow-tag').textContent = data.intro.eyebrow;
   intro.querySelector('h1').textContent = data.intro.title;
   intro.querySelectorAll('.me-intro-paragraph').forEach((paragraph, index) => {
-    paragraph.innerHTML = data.intro.paragraphs[index] || '';
+    window.rikitoMarkdown.set(paragraph, data.intro.paragraphs[index] || '', true);
   });
 
   const timeline = document.querySelector('[data-me-timeline]');
   const renderTimeline = (timelineData) => {
     timeline.querySelector('.eyebrow-tag').textContent = timelineData.eyebrow;
     timeline.querySelector('h2').textContent = timelineData.title;
-    timeline.querySelector('.block-intro').textContent = timelineData.intro;
+    window.rikitoMarkdown.set(timeline.querySelector('.block-intro'), timelineData.intro, true);
     const timelineList = timeline.querySelector('.timeline');
     timelineList.dataset.start = timelineData.events[0]?.year || '';
     timelineList.dataset.end = timelineData.events[timelineData.events.length - 1]?.year || '';
-    timelineList.innerHTML = timelineData.events.map((event, index) => `
-      <li style="--timeline-index:${index}">
-        <button class="timeline-dot" type="button" aria-label="Show ${event.year}: ${event.title}"></button>
-        <div class="timeline-detail">
-          <span class="t-year">${event.year}</span>
-          <span class="t-title">${event.title}</span>
-          <p class="t-body">${event.body}${event.bodyLink ? ` <a href="${event.bodyLink}">open related page →</a>` : ''}</p>
-          ${event.more ? `<details class="t-expand"><summary>read more</summary><p class="t-more">${event.more}</p></details>` : ''}
-        </div>
-      </li>`).join('');
+    timelineList.replaceChildren(...timelineData.events.map((event, index) => {
+      const item = document.createElement('li');
+      item.style.setProperty('--timeline-index', index);
+      const dot = document.createElement('button');
+      dot.className = 'timeline-dot';
+      dot.type = 'button';
+      dot.setAttribute('aria-label', `Show ${event.year}: ${event.title}`);
+      const detail = document.createElement('div');
+      detail.className = 'timeline-detail';
+      const year = document.createElement('span');
+      year.className = 't-year';
+      year.textContent = event.year;
+      const title = document.createElement('span');
+      title.className = 't-title';
+      title.textContent = event.title;
+      const body = document.createElement('div');
+      body.className = 't-body';
+      window.rikitoMarkdown.set(body, event.body);
+      if (event.bodyLink) {
+        const link = document.createElement('a');
+        link.href = event.bodyLink;
+        link.textContent = 'open related page →';
+        body.append(' ', link);
+      }
+      detail.append(year, title, body);
+      if (event.more) {
+        const more = document.createElement('details');
+        more.className = 't-expand';
+        const summary = document.createElement('summary');
+        summary.textContent = 'read more';
+        const moreBody = document.createElement('div');
+        moreBody.className = 't-more';
+        window.rikitoMarkdown.set(moreBody, event.more);
+        more.append(summary, moreBody);
+        detail.appendChild(more);
+      }
+      item.append(dot, detail);
+      return item;
+    }));
     timelineList.insertAdjacentHTML('afterbegin', `
       <span class="timeline-endpoint timeline-start">${timelineList.dataset.start}</span>
       <span class="timeline-endpoint timeline-end">${timelineList.dataset.end}</span>`);
@@ -69,7 +100,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   thinking.querySelector('.eyebrow-tag').textContent = data.thinking.eyebrow;
   thinking.querySelector('h2').textContent = data.thinking.title;
   thinking.querySelectorAll('.me-thinking-paragraph').forEach((paragraph, index) => {
-    paragraph.innerHTML = data.thinking.paragraphs[index] || '';
+    window.rikitoMarkdown.set(paragraph, data.thinking.paragraphs[index] || '', true);
   });
   thinking.querySelector('.sticky').textContent = data.thinking.note;
 

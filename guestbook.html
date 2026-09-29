@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rikitoism — the guestbook</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/guestbook.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <a href="index.html" class="brand"><span class="dot"></span>Rikitoism <small>· story worth telling</small></a>
+  <nav class="site-nav" aria-label="Main">
+    <a href="index.html">home</a>
+    <a href="me.html">me</a>
+    <a href="journal.html">journal</a>
+    <a href="memories.html">memories</a>
+    <a href="influences.html">influences</a>
+    <a href="creations.html">creations</a>
+    <a href="archive.html">archive</a>
+  </nav>
+</header>
+
+<main id="main" class="page guestbook-page">
+  <section class="guestbook-stage" aria-labelledby="guestbook-title">
+    <div class="guestbook-intro">
+      <p class="eyebrow-tag">a small corner for honest words</p>
+      <div class="guestbook-title-row">
+        <h1 id="guestbook-title">THE GUESTBOOK</h1>
+      </div>
+      <p class="lede">A kind word, an honest opinion, a confession, or something you have been meaning to say. I read every note before it reaches the wall.</p>
+      <ul class="guestbook-rules">
+        <li>Anonymous unless you leave an alias</li>
+        <li>Every note is reviewed before publishing</li>
+        <li>Be honest, not cruel</li>
+      </ul>
+    </div>
+
+    <div class="guestbook-drop">
+      <form id="guestbook-form" class="guestbook-composer" data-kind="opinion" autocomplete="off">
+        <fieldset class="guestbook-types">
+          <legend class="sr-only">What are you leaving?</legend>
+          <label><input type="radio" name="type" value="opinion" checked><span>💭 Opinion</span></label>
+          <label><input type="radio" name="type" value="appreciation"><span>🫂 Appreciation</span></label>
+          <label><input type="radio" name="type" value="confession"><span>🗣️ Confession</span></label>
+          <label><input type="radio" name="type" value="criticism"><span>🔥 Criticism</span></label>
+        </fieldset>
+
+        <label class="sr-only" for="guestbook-message">Your message</label>
+        <textarea id="guestbook-message" name="message" rows="7" maxlength="600" minlength="10" required placeholder="Something you never told me..."></textarea>
+
+        <fieldset class="guestbook-feelings" aria-label="Optional opinion reaction">
+          <div class="guestbook-feeling-options">
+            <label title="Sad"><input type="radio" name="feeling" value="😢"><span aria-hidden="true">😢</span><span class="sr-only">Sad</span></label>
+            <label title="Unsure"><input type="radio" name="feeling" value="😕"><span aria-hidden="true">😕</span><span class="sr-only">Unsure</span></label>
+            <label title="Neutral"><input type="radio" name="feeling" value="😐"><span aria-hidden="true">😐</span><span class="sr-only">Neutral</span></label>
+            <label title="Happy"><input type="radio" name="feeling" value="🙂"><span aria-hidden="true">🙂</span><span class="sr-only">Happy</span></label>
+            <label title="Loved it"><input type="radio" name="feeling" value="🥰"><span aria-hidden="true">🥰</span><span class="sr-only">Loved it</span></label>
+          </div>
+        </fieldset>
+
+        <div class="guestbook-under">
+          <label class="sr-only" for="guestbook-name">Nickname, optional</label>
+          <input id="guestbook-name" name="name" maxlength="30" autocomplete="nickname" placeholder="Nickname (optional)">
+          <span id="guestbook-count" class="guestbook-count" aria-live="off">0 / 600</span>
+        </div>
+
+        <div class="guestbook-honeypot" aria-hidden="true"><label>Leave this empty<input name="website" type="text" tabindex="-1" autocomplete="off"></label></div>
+        <button class="guestbook-drop-button" type="submit">Drop it in</button>
+      </form>
+      <div class="guestbook-slot" aria-hidden="true"></div>
+      <p id="guestbook-form-status" class="guestbook-form-status" role="status" aria-live="polite">Your note stays private until it is reviewed.</p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="guestbook-wall block" aria-labelledby="guestbook-wall-title">
+    <div class="guestbook-wall-heading">
+      <div><p class="eyebrow-tag">the notes that made it onto the wall</p><h2 id="guestbook-wall-title">The wall</h2></div>
+      <span id="guestbook-total" class="guestbook-total">0 notes</span>
+    </div>
+    <div class="guestbook-filters" role="group" aria-label="Filter guestbook notes">
+      <button class="guestbook-filter is-active" type="button" data-filter="all" aria-pressed="true">all</button>
+      <button class="guestbook-filter" type="button" data-filter="opinion" aria-pressed="false">opinions</button>
+      <button class="guestbook-filter" type="button" data-filter="appreciation" aria-pressed="false">appreciation</button>
+      <button class="guestbook-filter" type="button" data-filter="confession" aria-pressed="false">confessions</button>
+      <button class="guestbook-filter" type="button" data-filter="criticism" aria-pressed="false">criticism</button>
+    </div>
+    <div id="guestbook-wall" class="guestbook-grid" aria-live="polite">
+      <p class="feed-status">loading the wall...</p>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <span class="scribble">made with late nights &amp; questionable css</span>
+  <span>© <span id="year"></span> · <a href="archive.html">everything, archived</a></span>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/site-layout.js"></script>
+<script src="js/guestbook.js"></script>
+<script src="js/script.js"></script>
+</body>
+</html>

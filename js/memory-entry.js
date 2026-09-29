@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', async () => {
+  await window.rikitoMarkdownReady;
+  await window.rikitoMarkdown.ensure().catch(() => {});
   const container = document.getElementById('memory-entry');
   const slug = new URLSearchParams(window.location.search).get('slug');
   const client = window.soulSupabase?.client;
@@ -32,7 +34,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   container.replaceChildren();
   const description = document.createElement('p');
   description.className = 'lede';
-  description.textContent = memory.description;
+  window.rikitoMarkdown.set(description, memory.description, true);
   if (memory.cover_image) {
     const cover = document.createElement('img');
     cover.className = 'memory-entry-cover';

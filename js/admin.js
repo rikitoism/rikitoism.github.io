@@ -4,12 +4,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const loginForm = document.getElementById('login-form');
   const loginMessage = document.getElementById('login-message');
   const dashboard = document.getElementById('dashboard');
+  const adminHome = document.getElementById('admin-home');
   const logoutButton = document.getElementById('logout-button');
   const journalEditor = document.getElementById('journal-editor');
   const journalForm = document.getElementById('journal-form');
   const journalList = document.getElementById('journal-entry-list');
   const journalMessage = document.getElementById('journal-form-message');
   const newJournalEntry = document.getElementById('new-journal-entry');
+  const journalBodyInput = journalForm.elements.body;
+  const journalBodyPreview = document.getElementById('journal-body-preview');
   const memoryEditor = document.getElementById('memory-editor');
   const memoryForm = document.getElementById('memory-form');
   const memoryListAdmin = document.getElementById('memory-list-admin');
@@ -22,27 +25,152 @@ document.addEventListener('DOMContentLoaded', () => {
   const meTimelineForm = document.getElementById('me-timeline-form');
   const meTimelineList = document.getElementById('me-timeline-list-admin');
   const meTimelineMessage = document.getElementById('me-timeline-message');
+  const timelineToolbar = document.getElementById('new-timeline-event').closest('.admin-toolbar');
+  const timelineListWrap = timelineListAdmin.closest('.editor-list-wrap');
+  const timelinePanel = document.createElement('section');
+  timelinePanel.id = 'timeline-editor';
+  timelinePanel.className = 'admin-card editor-panel';
+  timelinePanel.hidden = true;
+  timelineToolbar.querySelector('.eyebrow-tag').textContent = 'memory timeline';
+  timelineToolbar.querySelector('h2').textContent = 'Timeline events';
+  timelinePanel.append(timelineToolbar, timelineForm, timelineListWrap);
+  memoryEditor.querySelector('.divider')?.remove();
+  document.querySelector('.admin-content').insertBefore(timelinePanel, document.getElementById('guestbook-editor'));
   const supabaseState = window.soulSupabase;
   const editorPanels = [...document.querySelectorAll('.editor-panel')];
+  const editorFormLists = new Map();
+  const routeToPanel = {
+    overview: 'admin-home',
+    guestbook: 'guestbook-editor',
+    journal: 'journal-editor',
+    memories: 'memory-editor',
+    timeline: 'timeline-editor',
+    influences: 'influence-editor',
+    creations: 'creation-editor',
+    'me-timeline': 'me-timeline-editor'
+  };
+  const panelToRoute = Object.fromEntries(Object.entries(routeToPanel).map(([route, panel]) => [panel, route]));
+
+  function configureEditorForm(form, list) {
+    if (!form || !list) return;
+    editorFormLists.set(form, list);
+    form.hidden = true;
+    list.hidden = false;
+    form.addEventListener('reset', () => window.setTimeout(() => refreshMarkdownPreviews(form), 0));
+    if (!form.querySelector('[data-cancel-form]')) {
+      const cancel = document.createElement('button');
+      cancel.className = 'btn btn-outline';
+      cancel.type = 'button';
+      cancel.dataset.cancelForm = form.getAttribute('id');
+      cancel.textContent = 'back to list';
+      const actions = form.querySelector('.editor-actions');
+      if (actions) actions.appendChild(cancel);
+      else form.appendChild(cancel);
+    }
+  }
+
+  function attachMarkdownPreview(textarea) {
+    if (textarea.dataset.markdownPreview) return;
+    textarea.dataset.markdownPreview = 'true';
+    const preview = document.createElement('div');
+    preview.className = 'markdown-live-preview';
+    preview.setAttribute('aria-label', 'Formatted Markdown preview');
+    textarea.insertAdjacentElement('afterend', preview);
+    const update = () => window.rikitoMarkdown.set(preview, textarea.value);
+    textarea._markdownPreviewUpdate = update;
+    textarea.addEventListener('input', update);
+    update();
+  }
+
+  function refreshMarkdownPreviews(container) {
+    container.querySelectorAll('textarea[data-markdown]').forEach((textarea) => {
+      attachMarkdownPreview(textarea);
+      textarea._markdownPreviewUpdate?.();
+    });
+  }
+
+  document.querySelectorAll('textarea[data-markdown]').forEach(attachMarkdownPreview);
+
+  function showEditorForm(form) {
+    const list = editorFormLists.get(form);
+    if (list) list.hidden = true;
+    form.hidden = false;
+    form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function showEditorList(form) {
+    form.hidden = true;
+    const list = editorFormLists.get(form);
+    if (list) list.hidden = false;
+  }
+
+  function openEditorPanel(activeId, updateHash = true) {
+    const editor = document.getElementById(activeId);
+    if (!editor) return;
+    closeOtherEditors(activeId);
+    editorFormLists.forEach((list, form) => {
+      if (!editor.contains(form)) return;
+      form.hidden = true;
+      list.hidden = false;
+    });
+    editor.hidden = false;
+    document.querySelectorAll('.admin-module[data-open-editor]').forEach((button) => {
+      if (button.dataset.openEditor === activeId) button.setAttribute('aria-current', 'page');
+      else button.removeAttribute('aria-current');
+    });
+    if (updateHash && panelToRoute[activeId]) history.replaceState(null, '', `#${panelToRoute[activeId]}`);
+    window.dispatchEvent(new CustomEvent('admin:editor-open', { detail: { panelId: activeId } }));
+    if (supabaseState?.client) {
+      if (editor === journalEditor) loadJournalEntries();
+      if (editor === memoryEditor) loadMemories();
+      if (editor === timelinePanel) loadTimelineEvents();
+      if (editor.id === 'creation-editor') loadCreations();
+      if (editor === meTimelineEditor) loadMeTimeline();
+    }
+  }
+
+  function openRouteFromHash() {
+    const activeId = routeToPanel[window.location.hash.slice(1)] || 'admin-home';
+    openEditorPanel(activeId, false);
+  }
+
+  [
+    [journalForm, journalList.closest('.editor-list-wrap')],
+    [memoryForm, memoryListAdmin.closest('.editor-list-wrap')],
+    [timelineForm, timelineListAdmin.closest('.editor-list-wrap')],
+    [meTimelineForm, meTimelineList.closest('.editor-list-wrap')]
+  ].forEach(([form, list]) => configureEditorForm(form, list));
+
+  document.addEventListener('click', (event) => {
+    const cancel = event.target.closest('[data-cancel-form]');
+    if (!cancel) return;
+    const form = document.getElementById(cancel.dataset.cancelForm);
+    if (form) showEditorList(form);
+  });
 
   const showLogin = () => {
+    document.body.classList.remove('admin-authenticated');
     loginPanel.hidden = false;
     dashboard.hidden = true;
+    adminHome.hidden = true;
+    editorPanels.forEach((panel) => { panel.hidden = true; });
   };
 
   if (!supabaseState || !supabaseState.configured || !supabaseState.client) {
     status.textContent = 'Supabase is not configured yet. Add js/supabase-config.js after creating your project.';
     status.className = 'admin-message';
     dashboard.hidden = false;
+    adminHome.hidden = false;
     document.querySelectorAll('[data-open-editor]').forEach((button) => {
       button.addEventListener('click', () => {
-        closeOtherEditors(button.dataset.openEditor);
+        openEditorPanel(button.dataset.openEditor);
         const editor = document.getElementById(button.dataset.openEditor);
-        editor.hidden = false;
         const message = editor.querySelector('.admin-message');
         if (message) message.textContent = 'Preview only: connect Supabase before saving entries.';
       });
     });
+    window.addEventListener('hashchange', openRouteFromHash);
+    if (window.location.hash) openRouteFromHash();
     return;
   }
 
@@ -50,8 +178,8 @@ document.addEventListener('DOMContentLoaded', () => {
   showLogin();
 
   supabaseState.client.auth.onAuthStateChange((_event, session) => {
-    loginPanel.hidden = Boolean(session);
-    dashboard.hidden = !session;
+    if (session) showWorkspace();
+    else showLogin();
   });
 
   loginForm.addEventListener('submit', async (event) => {
@@ -73,23 +201,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.querySelectorAll('[data-open-editor]').forEach((button) => {
     button.addEventListener('click', () => {
-      closeOtherEditors(button.dataset.openEditor);
-      const editor = document.getElementById(button.dataset.openEditor);
-      editor.hidden = false;
-      if (editor === journalEditor) loadJournalEntries();
-      if (editor === memoryEditor) {
-        loadMemories();
-        loadTimelineEvents();
-      }
-      if (editor.id === 'creation-editor') loadCreations();
-      if (editor === meTimelineEditor) loadMeTimeline();
+      openEditorPanel(button.dataset.openEditor);
     });
-
   });
+  window.addEventListener('hashchange', openRouteFromHash);
   function closeOtherEditors(activeId) {
     editorPanels.forEach((panel) => {
       if (panel.id !== activeId) panel.hidden = true;
     });
+    adminHome.hidden = activeId !== 'admin-home';
+    document.querySelectorAll('.admin-module[data-open-editor]').forEach((button) => {
+      if (button.dataset.openEditor === activeId) button.setAttribute('aria-current', 'page');
+      else button.removeAttribute('aria-current');
+    });
+  }
+
+  function showWorkspace() {
+    document.body.classList.add('admin-authenticated');
+    loginPanel.hidden = true;
+    dashboard.hidden = false;
+    openRouteFromHash();
   }
 
   if (meTimelineForm) {
@@ -97,6 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
       meTimelineForm.reset();
       meTimelineForm.elements.id.value = '';
       meTimelineMessage.textContent = '';
+      showEditorForm(meTimelineForm);
     });
     meTimelineForm.addEventListener('submit', saveMeTimelineEvent);
   }
@@ -109,11 +241,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!events.length) { meTimelineList.textContent = 'No saved events yet. The starter data is still active.'; return; }
     events.forEach((event, index) => {
       const row = document.createElement('div'); row.className = 'editor-list-item';
-      const details = document.createElement('p'); details.innerHTML = `<strong>${escapeHtml(event.title)}</strong><br><small>${escapeHtml(event.year || '')}</small>`;
+      const details = document.createElement('button'); details.className = 'editor-row-main'; details.type = 'button';
+      const title = document.createElement('strong'); title.textContent = event.title;
+      const year = document.createElement('small'); year.textContent = event.year || '';
+      details.append(title, year); details.addEventListener('click', () => fillMeTimelineEvent(event, index));
       const actions = document.createElement('div'); actions.className = 'editor-item-actions';
-      const edit = document.createElement('button'); edit.className = 'btn btn-outline'; edit.type = 'button'; edit.textContent = 'edit'; edit.onclick = () => fillMeTimelineEvent(event, index);
       const remove = document.createElement('button'); remove.className = 'btn btn-danger'; remove.type = 'button'; remove.textContent = 'delete'; remove.onclick = () => deleteMeTimelineEvent(index, event.title);
-      actions.append(edit, remove); row.append(details, actions); meTimelineList.appendChild(row);
+      actions.append(remove); row.append(details, actions); meTimelineList.appendChild(row);
     });
   }
   async function saveMeTimelineEvent(event) {
@@ -136,13 +270,14 @@ document.addEventListener('DOMContentLoaded', () => {
     events.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
     const { error } = await supabaseState.client.from('site_settings').upsert({ key: 'me_timeline', value: { events } });
     meTimelineMessage.textContent = error ? error.message : 'Me timeline saved.';
-    if (!error) { meTimelineForm.reset(); meTimelineForm.elements.id.value = ''; loadMeTimeline(); }
+    if (!error) { meTimelineForm.reset(); meTimelineForm.elements.id.value = ''; showEditorList(meTimelineForm); loadMeTimeline(); }
   }
   function fillMeTimelineEvent(entry, index) {
     meTimelineForm.elements.id.value = index;
     ['year', 'title', 'body', 'more', 'bodyLink', 'sort_order'].forEach((field) => { meTimelineForm.elements[field].value = entry[field] ?? ''; });
+    refreshMarkdownPreviews(meTimelineForm);
     meTimelineMessage.textContent = `editing ${entry.title}`;
-    meTimelineForm.scrollIntoView({ behavior: 'smooth' });
+    showEditorForm(meTimelineForm);
   }
   async function deleteMeTimelineEvent(index, title) {
     if (!window.confirm(`Delete "${title}"? This cannot be undone.`)) return;
@@ -161,6 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
     memoryPhotoFields.replaceChildren();
     addMemoryPhotoField();
     memoryMessage.textContent = '';
+    showEditorForm(memoryForm);
   });
 
   document.getElementById('add-memory-photo').addEventListener('click', addMemoryPhotoField);
@@ -244,6 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     memoryForm.elements.id.value = memoryId;
     memoryMessage.textContent = 'memory saved.';
+    showEditorList(memoryForm);
     loadMemories();
   });
 
@@ -251,6 +388,7 @@ document.addEventListener('DOMContentLoaded', () => {
     timelineForm.reset();
     timelineForm.elements.id.value = '';
     timelineMessage.textContent = '';
+    showEditorForm(timelineForm);
   });
 
   timelineForm.addEventListener('submit', async (event) => {
@@ -275,7 +413,7 @@ document.addEventListener('DOMContentLoaded', () => {
       : supabaseState.client.from('memory_timeline').insert(payload);
     const { error } = await query;
     timelineMessage.textContent = error ? error.message : 'event saved.';
-    if (!error) loadTimelineEvents();
+    if (!error) { showEditorList(timelineForm); loadTimelineEvents(); }
   });
 
   async function loadMemories() {
@@ -301,21 +439,23 @@ document.addEventListener('DOMContentLoaded', () => {
     data.forEach((entry) => {
       const item = document.createElement('div');
       item.className = 'editor-list-item';
-      const details = document.createElement('p');
-      details.innerHTML = `<strong>${escapeHtml(entry.title)}</strong><br><small>${escapeHtml(entry.status)} · ${escapeHtml(entry.slug || entry.date_label)}</small>`;
+      const details = document.createElement('button');
+      details.className = 'editor-row-main';
+      details.type = 'button';
+      const title = document.createElement('strong');
+      title.textContent = entry.title;
+      const meta = document.createElement('small');
+      meta.textContent = `${entry.status} · ${entry.slug || entry.date_label}`;
+      details.append(title, meta);
+      details.addEventListener('click', () => editHandler(entry.id));
       const actions = document.createElement('div');
       actions.className = 'editor-item-actions';
-      const edit = document.createElement('button');
-      edit.className = 'btn btn-outline';
-      edit.type = 'button';
-      edit.textContent = 'edit';
-      edit.addEventListener('click', () => editHandler(entry.id));
       const remove = document.createElement('button');
       remove.className = 'btn btn-danger';
       remove.type = 'button';
       remove.textContent = 'delete';
       remove.addEventListener('click', () => deleteHandler(entry.id, entry.title));
-      actions.append(edit, remove);
+      actions.append(remove);
       item.append(details, actions);
       container.appendChild(item);
     });
@@ -330,11 +470,12 @@ document.addEventListener('DOMContentLoaded', () => {
     memoryForm.elements.description.value = data.description;
     memoryForm.elements.cover_image.value = data.cover_image || '';
     memoryForm.elements.status.value = data.status;
+    refreshMarkdownPreviews(memoryForm);
     memoryPhotoFields.replaceChildren();
     (data.memory_photos || []).sort((a, b) => a.sort_order - b.sort_order).forEach(addMemoryPhotoField);
     if (!data.memory_photos?.length) addMemoryPhotoField();
     memoryMessage.textContent = 'editing ' + data.title;
-    memoryEditor.scrollIntoView({ behavior: 'smooth' });
+    showEditorForm(memoryForm);
   }
 
   async function fillTimelineForm(id) {
@@ -346,8 +487,9 @@ document.addEventListener('DOMContentLoaded', () => {
     timelineForm.elements.description.value = data.description;
     timelineForm.elements.more_description.value = data.more_description || '';
     timelineForm.elements.status.value = data.status;
+    refreshMarkdownPreviews(timelineForm);
     timelineMessage.textContent = 'editing ' + data.title;
-    timelineForm.scrollIntoView({ behavior: 'smooth' });
+    showEditorForm(timelineForm);
   }
 
   async function deleteMemory(id, title) {
@@ -394,7 +536,25 @@ document.addEventListener('DOMContentLoaded', () => {
     journalForm.reset();
     journalForm.elements.id.value = '';
     journalMessage.textContent = '';
+    renderJournalPreview();
+    showEditorForm(journalForm);
   });
+
+  journalBodyInput.addEventListener('input', renderJournalPreview);
+  renderJournalPreview();
+
+  function renderJournalPreview() {
+    const source = journalBodyInput.value;
+    if (!source.trim()) {
+      journalBodyPreview.innerHTML = '<p class="admin-help">Your formatted entry appears here.</p>';
+      return;
+    }
+    const escaped = escapeHtml(source).replace(/\n/g, '<br>');
+    const rendered = window.marked?.parse ? window.marked.parse(source) : `<p>${escaped}</p>`;
+    journalBodyPreview.innerHTML = window.DOMPurify?.sanitize
+      ? window.DOMPurify.sanitize(rendered)
+      : `<p>${escaped}</p>`;
+  }
 
   journalForm.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -404,7 +564,7 @@ document.addEventListener('DOMContentLoaded', () => {
       title: formData.get('title'),
       slug: formData.get('slug'),
       excerpt: formData.get('excerpt') || '',
-      body: { html: formData.get('body') || '' },
+      body: { markdown: formData.get('body') || '' },
       cover_image: formData.get('cover_image') || null,
       status: formData.get('status'),
       published_at: formData.get('status') === 'published' ? new Date().toISOString() : null
@@ -415,7 +575,13 @@ document.addEventListener('DOMContentLoaded', () => {
       : supabaseState.client.from('journal_entries').insert(payload);
     const { error } = await query;
     journalMessage.textContent = error ? error.message : 'saved.';
-    if (!error) loadJournalEntries();
+    if (!error) {
+      journalForm.reset();
+      journalForm.elements.id.value = '';
+      renderJournalPreview();
+      showEditorList(journalForm);
+      loadJournalEntries();
+    }
   });
 
   async function loadJournalEntries() {
@@ -435,13 +601,15 @@ document.addEventListener('DOMContentLoaded', () => {
     data.forEach((entry) => {
       const item = document.createElement('div');
       item.className = 'editor-list-item';
-      const details = document.createElement('p');
-      details.innerHTML = `<strong>${escapeHtml(entry.title)}</strong><br><small>${escapeHtml(entry.status)} · ${escapeHtml(entry.slug)}</small>`;
-      const edit = document.createElement('button');
-      edit.className = 'btn btn-outline';
-      edit.type = 'button';
-      edit.textContent = 'edit';
-      edit.addEventListener('click', () => fillJournalForm(entry.id));
+      const details = document.createElement('button');
+      details.className = 'editor-row-main';
+      details.type = 'button';
+      const title = document.createElement('strong');
+      title.textContent = entry.title;
+      const meta = document.createElement('small');
+      meta.textContent = `${entry.status} · ${entry.slug}`;
+      details.append(title, meta);
+      details.addEventListener('click', () => fillJournalForm(entry.id));
       const remove = document.createElement('button');
       remove.className = 'btn btn-danger';
       remove.type = 'button';
@@ -449,7 +617,7 @@ document.addEventListener('DOMContentLoaded', () => {
       remove.addEventListener('click', () => deleteJournalEntry(entry.id, entry.title));
       const actions = document.createElement('div');
       actions.className = 'editor-item-actions';
-      actions.append(edit, remove);
+      actions.append(remove);
       item.append(details, actions);
       journalList.appendChild(item);
     });
@@ -487,6 +655,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!error) {
       journalForm.reset();
       journalForm.elements.id.value = '';
+      showEditorList(journalForm);
       loadJournalEntries();
     }
   }
@@ -505,11 +674,12 @@ document.addEventListener('DOMContentLoaded', () => {
     journalForm.elements.title.value = data.title;
     journalForm.elements.slug.value = data.slug;
     journalForm.elements.excerpt.value = data.excerpt;
-    journalForm.elements.body.value = data.body?.html || '';
+    journalForm.elements.body.value = data.body?.markdown ?? data.body?.html ?? '';
+    renderJournalPreview();
     journalForm.elements.cover_image.value = data.cover_image || '';
     journalForm.elements.status.value = data.status;
     journalMessage.textContent = 'editing ' + data.title;
-    journalEditor.scrollIntoView({ behavior: 'smooth' });
+    showEditorForm(journalForm);
   }
 
   function escapeHtml(value) {
@@ -523,12 +693,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const creationList = document.getElementById('creation-list-admin');
   const creationMessage = document.getElementById('creation-form-message');
   if (creationForm) {
+    configureEditorForm(creationForm, creationList.closest('.editor-list-wrap'));
     document.getElementById('new-creation').addEventListener('click', () => {
       creationForm.reset();
       creationForm.elements.id.value = '';
       creationBlocks.replaceChildren();
       addCreationBlock();
       creationMessage.textContent = '';
+      showEditorForm(creationForm);
     });
     document.getElementById('add-creation-block').addEventListener('click', () => addCreationBlock());
     creationForm.addEventListener('submit', saveCreation);
@@ -536,12 +708,13 @@ document.addEventListener('DOMContentLoaded', () => {
   function addCreationBlock(block = { type: 'text', content: '' }) {
     const field = document.createElement('div');
     field.className = 'creation-block-field';
-    field.innerHTML = '<div class="creation-block-toolbar"><select name="block_type"><option value="text">Text</option><option value="heading">Heading</option><option value="image">Image</option><option value="gallery">Gallery</option><option value="code">Code / equation</option><option value="embed">Link / embed</option></select><button class="btn btn-danger remove-block" type="button">remove</button></div><input name="block_url" type="url" placeholder="Image or external URL"><textarea name="block_content" rows="4" placeholder="Write this block..."></textarea>';
+    field.innerHTML = '<div class="creation-block-toolbar"><select name="block_type"><option value="text">Text</option><option value="heading">Heading</option><option value="image">Image</option><option value="gallery">Gallery</option><option value="code">Code / equation</option><option value="embed">Link / embed</option></select><button class="btn btn-danger remove-block" type="button">remove</button></div><input name="block_url" type="url" placeholder="Image or external URL"><textarea name="block_content" data-markdown rows="4" placeholder="Write this block in Markdown..."></textarea>';
     field.querySelector('[name="block_type"]').value = block.type || 'text';
     field.querySelector('[name="block_url"]').value = block.url || '';
     field.querySelector('[name="block_content"]').value = block.content || '';
     field.querySelector('.remove-block').addEventListener('click', () => field.remove());
     creationBlocks.appendChild(field);
+    attachMarkdownPreview(field.querySelector('[name="block_content"]'));
   }
   function readCreationBlocks() {
     return [...creationBlocks.querySelectorAll('.creation-block-field')].map((field) => {
@@ -572,7 +745,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const query = id ? supabaseState.client.from('creations').update(payload).eq('id', id) : supabaseState.client.from('creations').insert(payload);
     const { error } = await query;
     creationMessage.textContent = error ? error.message : 'creation saved.';
-    if (!error) { creationForm.reset(); creationForm.elements.id.value = ''; creationBlocks.replaceChildren(); addCreationBlock(); loadCreations(); }
+    if (!error) { creationForm.reset(); creationForm.elements.id.value = ''; creationBlocks.replaceChildren(); addCreationBlock(); showEditorList(creationForm); loadCreations(); }
   }
   async function loadCreations() {
     if (!creationList) return;
@@ -581,11 +754,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (error) { creationList.textContent = error.message; return; }
     (data || []).forEach((entry) => {
       const row = document.createElement('div'); row.className = 'editor-list-item';
-      const details = document.createElement('p'); details.innerHTML = `<strong>${escapeHtml(entry.title)}</strong><br><small>${escapeHtml(entry.category)} · ${escapeHtml(entry.status)}</small>`;
+      const details = document.createElement('button'); details.className = 'editor-row-main'; details.type = 'button';
+      const title = document.createElement('strong'); title.textContent = entry.title;
+      const meta = document.createElement('small'); meta.textContent = `${entry.category} · ${entry.status}`;
+      details.append(title, meta); details.addEventListener('click', () => fillCreation(entry));
       const actions = document.createElement('div'); actions.className = 'editor-item-actions';
-      const edit = document.createElement('button'); edit.className = 'btn btn-outline'; edit.type = 'button'; edit.textContent = 'edit'; edit.onclick = () => fillCreation(entry);
       const remove = document.createElement('button'); remove.className = 'btn btn-danger'; remove.type = 'button'; remove.textContent = 'delete'; remove.onclick = () => deleteCreation(entry);
-      actions.append(edit, remove); row.append(details, actions); creationList.appendChild(row);
+      actions.append(remove); row.append(details, actions); creationList.appendChild(row);
     });
   }
   function fillCreation(entry) {
@@ -594,7 +769,7 @@ document.addEventListener('DOMContentLoaded', () => {
     creationForm.elements.tags.value = (entry.tags || []).join(', ');
     creationForm.elements.featured.checked = Boolean(entry.featured);
     creationBlocks.replaceChildren(); (Array.isArray(entry.body) ? entry.body : []).forEach(addCreationBlock); if (!creationBlocks.children.length) addCreationBlock();
-    creationForm.scrollIntoView({ behavior: 'smooth' }); creationMessage.textContent = `editing ${entry.title}`;
+    creationMessage.textContent = `editing ${entry.title}`; showEditorForm(creationForm);
   }
   async function deleteCreation(entry) {
     if (!window.confirm(`Delete "${entry.title}"? This cannot be undone.`)) return;
@@ -612,6 +787,17 @@ document.addEventListener('DOMContentLoaded', () => {
     song: { table: 'songs', form: document.getElementById('song-form'), fields: ['title', 'artist', 'description', 'image_url', 'song_url'] },
     shaped: { table: 'shaped_items', form: document.getElementById('shaped-form'), fields: ['medium', 'title', 'short_description', 'reflection', 'image_url', 'link_url'] }
   };
+  const influenceList = document.getElementById('influence-admin-lists');
+  Object.values(influenceTables).forEach((config) => configureEditorForm(config.form, influenceList));
+  document.querySelectorAll('[data-new-influence]').forEach((button) => button.addEventListener('click', () => {
+    const form = influenceTables[button.dataset.newInfluence]?.form;
+    if (!form) return;
+    form.reset();
+    form.elements.id.value = '';
+    const message = form.querySelector('.admin-message');
+    if (message) message.textContent = '';
+    showEditorForm(form);
+  }));
   Object.entries(influenceTables).forEach(([kind, config]) => {
     if (!config.form) return;
     config.form.addEventListener('submit', async (event) => {
@@ -630,7 +816,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const query = id ? supabaseState.client.from(config.table).update(values).eq('id', id) : supabaseState.client.from(config.table).insert(values);
       const { error } = await query;
       config.form.querySelector('.admin-message').textContent = error ? error.message : 'saved.';
-      if (!error) { config.form.reset(); config.form.elements.id.value = ''; loadInfluenceLists(); }
+      if (!error) { config.form.reset(); config.form.elements.id.value = ''; showEditorList(config.form); loadInfluenceLists(); }
     });
   });
   async function loadInfluenceLists() {
@@ -642,10 +828,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const heading = document.createElement('h3'); heading.textContent = kind; list.appendChild(heading);
       (data || []).forEach((entry) => {
         const row = document.createElement('div'); row.className = 'editor-list-item';
-        const text = document.createElement('p'); text.textContent = entry.title; const actions = document.createElement('div'); actions.className = 'editor-item-actions';
-        const edit = document.createElement('button'); edit.className = 'btn btn-outline'; edit.type = 'button'; edit.textContent = 'edit'; edit.onclick = () => { config.form.elements.id.value = entry.id; config.fields.forEach((field) => { config.form.elements[field].value = Array.isArray(entry[field]) ? entry[field].join(', ') : (entry[field] || ''); }); };
+        const text = document.createElement('button'); text.className = 'editor-row-main'; text.type = 'button';
+        const title = document.createElement('strong'); title.textContent = entry.title;
+        const meta = document.createElement('small'); meta.textContent = kind;
+        text.append(title, meta); text.onclick = () => { config.form.elements.id.value = entry.id; config.fields.forEach((field) => { config.form.elements[field].value = Array.isArray(entry[field]) ? entry[field].join(', ') : (entry[field] || ''); }); refreshMarkdownPreviews(config.form); showEditorForm(config.form); };
+        const actions = document.createElement('div'); actions.className = 'editor-item-actions';
         const remove = document.createElement('button'); remove.className = 'btn btn-danger'; remove.type = 'button'; remove.textContent = 'delete'; remove.onclick = async () => { const password = window.prompt('Enter your admin password to confirm deletion:'); if (!password) return; const { data: user } = await supabaseState.client.auth.getUser(); const auth = await supabaseState.client.auth.signInWithPassword({ email: user.user.email, password }); if (auth.error) return window.alert('Password verification failed.'); const result = await supabaseState.client.from(config.table).delete().eq('id', entry.id); if (result.error) window.alert(result.error.message); else loadInfluenceLists(); };
-        actions.append(edit, remove); row.append(text, actions); list.appendChild(row);
+        actions.append(remove); row.append(text, actions); list.appendChild(row);
       });
     }
   }
@@ -656,7 +845,9 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     loginPanel.hidden = Boolean(data.session);
-    dashboard.hidden = !data.session;
-    if (data.session) { loadJournalEntries(); loadInfluenceLists(); loadCreations(); }
+    if (data.session) {
+      showWorkspace();
+      loadJournalEntries(); loadInfluenceLists(); loadCreations();
+    }
   });
 });

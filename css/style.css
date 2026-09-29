@@ -529,6 +529,12 @@ h3{ font-size: 1.35rem; }
 
 p{ margin: 0 0 1em; max-width: 66ch; }
 .lede{ font-size: 1.15rem; color: var(--ink-soft); max-width: 56ch; }
+.markdown-copy > :first-child{ margin-top:0; }
+.markdown-copy > :last-child{ margin-bottom:0; }
+.markdown-copy p{ margin:0 0 .75em; }
+.markdown-copy ul,.markdown-copy ol{ padding-left:1.4em; margin:.5em 0 .8em; }
+.markdown-copy blockquote{ margin:.8em 0; padding-left:1em; border-left:3px solid var(--mustard); color:var(--ink-soft); }
+.markdown-copy a{ color:var(--denim); text-underline-offset:3px; }
 
 .underline-squiggle{
   position:relative;
