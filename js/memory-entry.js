@@ -48,20 +48,34 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const gallery = document.createElement('div');
   gallery.className = 'memory-gallery';
-  const columns = Array.from({ length: 4 }, () => document.createElement('div'));
-  columns.forEach((column) => {
-    column.className = 'memory-gallery-column';
-    gallery.appendChild(column);
-  });
-  photos.forEach((photo, index) => {
+  const figures = photos.map((photo) => {
     const figure = document.createElement('figure');
     figure.className = 'polaroid memory-photo-card';
     const image = document.createElement('img');
     image.src = photo.image_url;
     image.alt = memory.title;
+    image.loading = 'lazy';
+    image.decoding = 'async';
     figure.appendChild(image);
-    columns[index % columns.length].appendChild(figure);
+    return figure;
   });
+  // 2 columns on phones, 3 on tablets, 4 on desktop
+  const phoneQuery = window.matchMedia('(max-width: 620px)');
+  const tabletQuery = window.matchMedia('(max-width: 900px)');
+  const layoutGallery = () => {
+    const count = phoneQuery.matches ? 2 : tabletQuery.matches ? 3 : 4;
+    const columns = Array.from({ length: count }, () => {
+      const column = document.createElement('div');
+      column.className = 'memory-gallery-column';
+      return column;
+    });
+    figures.forEach((figure, index) => columns[index % count].appendChild(figure));
+    gallery.style.setProperty('--gallery-cols', count);
+    gallery.replaceChildren(...columns);
+  };
+  layoutGallery();
+  phoneQuery.addEventListener('change', layoutGallery);
+  tabletQuery.addEventListener('change', layoutGallery);
   container.appendChild(gallery);
 
   function showError(message) {

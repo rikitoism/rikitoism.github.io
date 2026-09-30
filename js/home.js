@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     <div class="home-intro-orbit" aria-hidden="true"><span></span><i>✦</i></div>
     <p class="home-intro-kicker">welcome humans</p>
     <p class="home-intro-title" data-text="SOUL.EXE">SOUL<span>.</span>EXE</p>
-    <p class="home-intro-status">just another wallflower · member of dead poet society</p>
+    <p class="home-intro-status"><span>just another wallflower</span><span class="home-intro-sep" aria-hidden="true">·</span><span>member of dead poet society</span></p>
     <button class="home-intro-skip" type="button">skip the theatrics →</button>`;
   document.body.prepend(intro);
   const closeIntro = () => {

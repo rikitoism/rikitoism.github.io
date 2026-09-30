@@ -75,6 +75,9 @@ body::before{
   align-content:center;
   gap:8px;
   overflow:hidden;
+  box-sizing:border-box;
+  padding:24px max(20px,env(safe-area-inset-right)) 24px max(20px,env(safe-area-inset-left));
+  text-align:center;
   background:var(--paper);
   color:var(--ink);
   animation:home-intro-idle 1.7s ease-in-out forwards;
@@ -104,7 +107,7 @@ body::before{
 .home-intro-kicker{ font-size:1.3rem; animation:intro-text-in .7s ease both; }
 .home-intro-title{
   position:relative; z-index:1; margin:0; font-family:var(--font-display);
-  font-size:clamp(3rem,10vw,7rem); letter-spacing:.08em; line-height:1;
+  font-size:clamp(2.6rem,12vw,7rem); letter-spacing:.08em; padding-left:.08em; line-height:1;
   animation:intro-title-in .9s cubic-bezier(.2,.8,.2,1) .15s both;
 }
 .home-intro-title span{ color:var(--rose); }.home-intro-title::before,
@@ -144,7 +147,17 @@ body::before{
 .home-intro-sparks b:nth-child(4){ --x:30vw; --y:17vh; color:var(--rose); animation-delay:1.24s; }
 .home-intro-sparks b:nth-child(5){ --x:-19vw; --y:27vh; animation-delay:1.3s; }
 .home-intro-sparks b:nth-child(6){ --x:22vw; --y:28vh; color:var(--sage); animation-delay:1.36s; }
-.home-intro-status{ font-family:'Courier New',monospace; font-size:.72rem; letter-spacing:.08em; animation:intro-text-in .7s ease .45s both; }
+.home-intro-status{
+  display:flex; flex-wrap:wrap; justify-content:center; align-items:center;
+  gap:.25rem .6rem; max-width:100%;
+  font-family:'Courier New',monospace; font-size:.72rem; letter-spacing:.08em;
+  animation:intro-text-in .7s ease .45s both;
+}
+@media (max-width:600px){
+  .home-intro-status{ flex-direction:column; gap:.3rem; font-size:.78rem; }
+  .home-intro-sep{ display:none; }
+  .home-intro-kicker{ font-size:1.15rem; }
+}
 .home-intro-skip{
   position:relative; z-index:1; margin-top:20px; padding:7px 12px;
   border:1px solid var(--line); background:transparent; color:var(--ink-soft);
@@ -944,7 +957,7 @@ p{ margin: 0 0 1em; max-width: 66ch; }
   .tag-list{ gap:6px; }
   .tag-list li{ padding:4px 9px; }
 }
-}
+
 
 /* ---------------------------------------------------------
    sections
@@ -1057,7 +1070,7 @@ section.block > h2{ margin-bottom: 6px; }
 }
 .memory-entry{ max-width:980px; margin:28px auto 0; }
 .memory-entry-cover{ width:100%; max-height:520px; object-fit:contain; margin:0 auto 28px; border:2px solid var(--ink); background:var(--paper-3); padding:8px; }
-.memory-gallery{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:24px; margin-top:30px; align-items:start; }
+.memory-gallery{ display:grid; grid-template-columns:repeat(var(--gallery-cols,4),minmax(0,1fr)); gap:24px; margin-top:30px; align-items:start; }
 .memory-gallery-column{ display:flex; flex-direction:column; gap:24px; min-width:0; }
 .memory-gallery .polaroid{ min-width:0; margin:0; transform:none; padding:6px; overflow:hidden; align-self:start; }
 .memory-gallery .polaroid img{
@@ -1068,6 +1081,30 @@ section.block > h2{ margin-bottom: 6px; }
   object-fit:contain;
   object-position:center;
   background:#fff;
+}
+
+/* ---- memories: responsive (2+ per row on phones) ---- */
+.memory-moments .memory-grid{ grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); }
+.memory-moments .polaroid{ margin:0; min-width:0; }   /* <figure> has a default 40px side margin that pushed cards off-screen */
+.memory-moments .polaroid figcaption{ overflow-wrap:anywhere; }
+@media (max-width:900px){
+  .memory-gallery,
+  .memory-gallery-column{ gap:16px; }
+}
+@media (max-width:720px){
+  .memory-moments{ overflow:visible; }
+  .memory-moments .memory-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:16px 12px;
+    padding:6px 6px 12px;           /* room for the tilted polaroids */
+  }
+  .memory-moments .polaroid{ padding:6px 6px 20px; }
+  .memory-moments .polaroid figcaption{ font-size:1rem; margin-top:6px; line-height:1.2; }
+}
+@media (max-width:620px){
+  .memory-gallery,
+  .memory-gallery-column{ gap:10px; }
+  .memory-gallery .polaroid{ padding:4px; }
 }
 
 /* ---------------------------------------------------------
@@ -1251,9 +1288,6 @@ section.block > h2{ margin-bottom: 6px; }
 @media (max-width:620px){
   .memory-entry{ width:100%; }
   .memory-entry-cover{ max-height:360px; }
-  .memory-gallery{ grid-template-columns:minmax(0,1fr); gap:18px; }
-  .memory-gallery-column{ display:contents; }
-  .memory-gallery .polaroid{ width:100%; }
   .timeline-stage{ padding-left:20px; padding-right:20px; min-height:0; }
   .timeline-stage .timeline{ display:block; min-height:0; padding-left:30px; }
   .timeline-stage .timeline::before{ left:8px; right:auto; top:0; bottom:0; width:3px; height:auto; }
