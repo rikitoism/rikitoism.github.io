@@ -2024,3 +2024,54 @@ details.t-expand .t-more{
  .dialog-close { float:right; border:0; background:none; font-size:2rem; cursor:pointer; }
  @media (max-width:620px){ .influence-section-heading { align-items:flex-start; flex-direction:column; gap:.35rem; } .influence-image-card { width:min(100%, 200px); } }
  @media (max-width:620px){ .creation-meta-row{ align-items:flex-start; flex-direction:column; gap:8px; } .creation-links{ justify-content:flex-start; } }
+
+/* ---------------------------------------------------------
+   influences page: responsive layout
+   (ID selectors on purpose: they beat the generic .grid /
+   .image-card-grid rules without touching them)
+   --------------------------------------------------------- */
+#core-interest-list,
+#playlist-list,
+#song-list,
+#shaped-list{ min-width:0; }
+#core-interest-list .card{ min-width:0; overflow-wrap:anywhere; }
+
+/* desktop: playlist cards sit side by side instead of floating in wide empty cells */
+#playlist-list{
+  grid-template-columns:repeat(auto-fill, 200px);
+  justify-content:start;
+  justify-items:start;
+  gap:28px;
+}
+
+@media (max-width:720px){
+  /* core interests: 2 per row */
+  #core-interest-list{ grid-template-columns:repeat(2, minmax(0, 1fr)); gap:12px; padding:4px 2px 8px; }
+  #core-interest-list .card{ padding:12px; }
+  #core-interest-list .card .card-meta{ font-size:.95rem; margin-bottom:4px; }
+  #core-interest-list .card h3{ font-size:1.05rem; line-height:1.2; }
+  #core-interest-list .card p,
+  #core-interest-list .card .markdown-copy{ font-size:.85rem; line-height:1.4; }
+  #core-interest-list .tag-list{ gap:5px; margin-top:8px; }
+  #core-interest-list .tag-list li{ padding:3px 8px; font-size:.72rem; }
+
+  /* playlists + "part of my identity": 2 per row */
+  #playlist-list,
+  #shaped-list{
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:16px 12px;
+    justify-content:stretch;
+    justify-items:center;
+    padding:6px 4px 10px;            /* room for the tilted cards */
+  }
+  .image-card-grid .influence-image-card{ width:100%; max-width:200px; min-width:0; padding:6px 6px 10px; }
+  .image-card-grid .influence-image-card img{ width:100%; }
+  .image-card-grid .influence-image-card figcaption{ width:auto; padding:0 2px; overflow-wrap:anywhere; }
+  .image-card-grid .influence-image-card figcaption span{ margin-top:6px; font-size:.95rem; }
+  .image-card-grid .influence-image-card figcaption strong{ font-size:1rem; line-height:1.2; }
+  .image-card-grid .influence-image-card .markdown-copy{ margin-top:3px; font-size:.8rem; line-height:1.3; color:var(--ink-soft); }
+
+  /* songs: one per row */
+  #song-list{ grid-template-columns:minmax(0, 1fr); max-width:none; gap:18px; padding:8px 4px; }
+  #song-list .song-note-content{ min-width:0; overflow-wrap:anywhere; }
+}
