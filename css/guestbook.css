@@ -3,7 +3,7 @@
 .guestbook-intro{ max-width:590px; }
 .guestbook-intro > .eyebrow-tag{ margin-bottom:10px; }
 .guestbook-title-row{ display:flex; flex-wrap:wrap; align-items:center; gap:10px 20px; }
-.guestbook-title-row h1{ max-width:520px; margin:0; font-family:var(--font-display); font-size:3.55rem; line-height:1.02; font-weight:600; }
+.guestbook-title-row h1{ max-width:520px; margin:0; font-family:var(--font-display); font-size:3.55rem; line-height:1.02; font-weight:200; }
 .guestbook-intro .lede{ max-width:520px; margin:20px 0 22px; font-family:var(--font-display); font-size:1.2rem; font-style:italic; line-height:1.55; }
 .guestbook-rules{ display:grid; gap:7px; margin:0; padding:0; list-style:none; color:var(--ink-soft); font-size:.9rem; }
 .guestbook-rules li::before{ content:"—"; margin-right:9px; color:var(--mustard); }
