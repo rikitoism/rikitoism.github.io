@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const { data: item, error } = await client.from('creations').select('*').eq('slug', slug).eq('status', 'published').single();
   if (error) { root.textContent = 'This creation could not be found.'; return; }
   root.replaceChildren();
-  const back = document.createElement('a'); back.className = 'feed-note'; back.href = 'creations.html'; back.textContent = '← back to creations';
+  const back = document.createElement('a'); back.className = 'feed-note'; back.href = 'creations'; back.textContent = '← back to creations';
   const meta = document.createElement('p'); meta.className = 'eyebrow-tag'; meta.textContent = item.category.replace('-', ' & ');
   const title = document.createElement('h1'); title.textContent = item.title; const intro = document.createElement('div'); intro.className = 'lede markdown-copy'; window.rikitoMarkdown.set(intro, item.short_description, true);
   root.append(back, meta, title, intro);

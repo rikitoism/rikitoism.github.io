@@ -18,10 +18,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   const [journals, memories, shapedItems, creations] = queries.map((result) => result.data || []);
   const entries = [
-    ...journals.map((item) => archiveEntry(item.title, 'journal', `journal-entry.html?slug=${encodeURIComponent(item.slug)}`, item.published_at || item.created_at)),
-    ...memories.map((item) => archiveEntry(item.title, 'memory', `memory-entry.html?slug=${encodeURIComponent(item.slug)}`, item.created_at)),
+    ...journals.map((item) => archiveEntry(item.title, 'journal', `journal-entry?slug=${encodeURIComponent(item.slug)}`, item.published_at || item.created_at)),
+    ...memories.map((item) => archiveEntry(item.title, 'memory', `memory-entry?slug=${encodeURIComponent(item.slug)}`, item.created_at)),
     ...shapedItems.map((item) => archiveEntry(item.title, item.medium || 'influence', '#', null, item)),
-    ...creations.map((item) => archiveEntry(item.title, item.category.replace('-', ' · '), `creation-entry.html?slug=${encodeURIComponent(item.slug)}`, item.published_at || item.created_at))
+    ...creations.map((item) => archiveEntry(item.title, item.category.replace('-', ' · '), `creation-entry?slug=${encodeURIComponent(item.slug)}`, item.published_at || item.created_at))
   ].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
   if (!entries.length) {

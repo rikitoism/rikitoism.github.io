@@ -1,25 +1,34 @@
 (function () {
+  // Clean URLs: GitHub Pages serves /journal for journal.html, so links carry no extension.
   const pages = [
-    ['index.html', 'home'],
-    ['me.html', 'me'],
-    ['journal.html', 'journal'],
-    ['journal-entry.html', 'journal'],
-    ['memories.html', 'memories'],
-    ['memory-entry.html', 'memories'],
-    ['influences.html', 'influences'],
-    ['influence-playlists.html', 'influences'],
-    ['influence-songs.html', 'influences'],
-    ['creations.html', 'creations'],
-    ['creation-entry.html', 'creations'],
-    ['guestbook.html', 'guestbook'],
-    ['archive.html', 'archive']
+    ['index', 'home'],
+    ['me', 'me'],
+    ['journal', 'journal'],
+    ['journal-entry', 'journal'],
+    ['memories', 'memories'],
+    ['memory-entry', 'memories'],
+    ['influences', 'influences'],
+    ['influence-playlists', 'influences'],
+    ['influence-songs', 'influences'],
+    ['creations', 'creations'],
+    ['creation-entry', 'creations'],
+    ['guestbook', 'guestbook'],
+    ['archive', 'archive']
   ];
-  const current = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
-  const active = (pages.find(([file]) => file === current) || ['index.html', 'home'])[1];
+  const { pathname, search, hash } = window.location;
+  // If someone lands on /journal.html (old link, bookmark), tidy the address bar to /journal.
+  if (/\.html?$/i.test(pathname) && window.history && window.history.replaceState && window.location.protocol !== 'file:') {
+    const clean = pathname.replace(/(^|\/)index\.html?$/i, '$1').replace(/\.html?$/i, '');
+    window.history.replaceState(null, '', (clean || '/') + search + hash);
+  }
+  // Works for /journal, /journal/, /journal.html and /index.html alike.
+  const current = (pathname.split('/').filter(Boolean).pop() || 'index').replace(/\.html?$/i, '').toLowerCase();
+  const active = (pages.find(([file]) => file === current) || ['index', 'home'])[1];
   const links = pages.filter(([file]) => !file.includes('-entry') && !file.startsWith('influence-'));
-  const nav = links.map(([file, label]) => `<a href="${file}"${label === active ? ' class="active"' : ''}>${label}</a>`).join('');
-  const header = `<header class="site-header"><a href="index.html" class="brand"><span class="dot"></span>Rikitoism <small>· story worth telling</small></a><button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open navigation"><span></span><span></span><span></span></button><nav class="site-nav" id="site-nav" aria-label="Main">${nav}</nav></header>`;
-  const footer = '<footer class="site-footer"><span class="scribble">made with late nights &amp; questionable css</span><span>© <span id="year"></span> · <a href="archive.html">everything, archived</a></span></footer>';
+  const hrefFor = (file) => (file === 'index' ? './' : file);
+  const nav = links.map(([file, label]) => `<a href="${hrefFor(file)}"${label === active ? ' class="active"' : ''}>${label}</a>`).join('');
+  const header = `<header class="site-header"><a href="./" class="brand"><span class="dot"></span>Rikitoism <small>· story worth telling</small></a><button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open navigation"><span></span><span></span><span></span></button><nav class="site-nav" id="site-nav" aria-label="Main">${nav}</nav></header>`;
+  const footer = '<footer class="site-footer"><span class="scribble">made with late nights &amp; questionable css</span><span>© <span id="year"></span> · <a href="archive">everything, archived</a></span></footer>';
   const existingHeader = document.querySelector('header.site-header');
   const existingFooter = document.querySelector('footer.site-footer');
   if (existingHeader) existingHeader.outerHTML = header;

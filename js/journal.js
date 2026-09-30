@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const link = document.createElement('a');
     link.className = 'btn btn-outline';
-    link.href = `journal-entry.html?slug=${encodeURIComponent(entry.slug)}`;
+    link.href = `journal-entry?slug=${encodeURIComponent(entry.slug)}`;
     link.textContent = 'read the full thought →';
 
     if (entry.cover_image) {

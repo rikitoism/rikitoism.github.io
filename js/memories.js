@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function createMemoryCard(memory, index) {
     const link = document.createElement('a');
-    link.href = `memory-entry.html?slug=${encodeURIComponent(memory.slug)}`;
+    link.href = `memory-entry?slug=${encodeURIComponent(memory.slug)}`;
     link.style.textDecoration = 'none';
     const figure = document.createElement('figure');
     figure.className = `polaroid r${(index % 3) + 1}`;

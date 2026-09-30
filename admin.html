@@ -19,7 +19,7 @@
       <h1>content admin</h1>
       <p class="lede">One calm place to add and edit the things that make up Rikitoism.</p>
     </div>
-    <a class="btn btn-outline" href="index.html">back to site</a>
+    <a class="btn btn-outline" href="./">back to site</a>
   </header>
 
   <section id="admin-status" class="admin-card" aria-live="polite">
@@ -52,7 +52,7 @@
         <button class="admin-module" type="button" data-open-editor="me-timeline-editor"><span class="admin-module-glyph" aria-hidden="true">↗</span><span class="admin-module-name">Me timeline</span></button>
       </nav>
       <div class="admin-sidebar-foot">
-        <a href="guestbook.html" target="_blank" rel="noopener">Preview guestbook <span aria-hidden="true">↗</span></a>
+        <a href="guestbook" target="_blank" rel="noopener">Preview guestbook <span aria-hidden="true">↗</span></a>
         <button id="logout-button" class="admin-signout" type="button">Sign out</button>
       </div>
     </aside>
@@ -89,7 +89,7 @@
       <label>Title<input name="title" required></label>
       <label>Description<textarea name="body" data-markdown rows="3"></textarea></label>
       <label>Optional read-more description<textarea name="more" data-markdown rows="4"></textarea></label>
-      <label>Optional link<input type="url" name="bodyLink" placeholder="https://... or journal.html"></label>
+      <label>Optional link<input type="url" name="bodyLink" placeholder="https://... or journal"></label>
       <label>Order<input name="sort_order" type="number" value="0"></label>
       <div class="editor-actions"><button class="btn" type="submit">save event →</button><button class="btn btn-outline" type="button" data-cancel-form="me-timeline-form">back to events</button><span id="me-timeline-message" class="admin-message" role="status"></span></div>
     </form>

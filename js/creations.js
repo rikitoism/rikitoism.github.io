@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!items.length) panel.innerHTML = '<p class="feed-status">nothing here yet.</p>';
   });
   function makeCard(item) {
-    const card = document.createElement('a'); card.className = 'card creation-card'; card.href = `creation-entry.html?slug=${encodeURIComponent(item.slug)}`;
+    const card = document.createElement('a'); card.className = 'card creation-card'; card.href = `creation-entry?slug=${encodeURIComponent(item.slug)}`;
     const status = document.createElement('span'); status.className = `status-chip ${item.status_label === 'RIP' ? 'rip' : item.status_label === 'experiment' ? 'experiment' : 'active'}`; status.textContent = item.status_label;
     const title = document.createElement('h3'); title.textContent = item.title; const description = document.createElement('div'); description.className = 'markdown-copy'; window.rikitoMarkdown.set(description, item.short_description, true);
     const tags = document.createElement('ul'); tags.className = 'tag-list'; (item.tags || []).forEach((tag) => { const li = document.createElement('li'); li.textContent = tag; tags.append(li); });
