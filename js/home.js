@@ -45,9 +45,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   intro.setAttribute('role', 'presentation');
   intro.innerHTML = `
     <div class="home-intro-orbit" aria-hidden="true"><span></span><i>✦</i></div>
-    <p class="home-intro-kicker">booting a small universe</p>
+    <p class="home-intro-kicker">welcome humans</p>
     <p class="home-intro-title" data-text="SOUL.EXE">SOUL<span>.</span>EXE</p>
-    <p class="home-intro-status">curiosity detected · loading ideas</p>
+    <p class="home-intro-status">just another wallflower · member of dead poet society</p>
     <button class="home-intro-skip" type="button">skip the theatrics →</button>`;
   document.body.prepend(intro);
   const closeIntro = () => {
