@@ -118,6 +118,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
+  let visibleCards = [];
+  const phoneQuery = window.matchMedia('(max-width: 620px)');
+  const tabletQuery = window.matchMedia('(max-width: 900px)');
+  phoneQuery.addEventListener('change', layoutWall);
+  tabletQuery.addEventListener('change', layoutWall);
+
   loadEntries();
 
   async function loadEntries() {
@@ -153,7 +159,26 @@ document.addEventListener('DOMContentLoaded', async () => {
       showWallStatus(entries.length ? 'No notes in this category yet.' : 'The wall is quiet for now. Leave the first note above.');
       return;
     }
-    wall.replaceChildren(...visibleEntries.map(createCard));
+    visibleCards = visibleEntries.map(createCard);
+    layoutWall();
+  }
+
+  // Masonry: 3 columns on desktop, 2 on tablet, 1 on phones. Each note goes into the
+  // shortest column, so the wall always fills the full width and the column bottoms stay even.
+  function layoutWall() {
+    if (!visibleCards.length) return;
+    const count = phoneQuery.matches ? 1 : tabletQuery.matches ? 2 : 3;
+    const columns = Array.from({ length: count }, () => {
+      const column = document.createElement('div');
+      column.className = 'guestbook-column';
+      return column;
+    });
+    wall.style.setProperty('--wall-cols', count);
+    wall.replaceChildren(...columns);   // columns must be in the page so their heights can be measured
+    visibleCards.forEach((card) => {
+      const shortest = columns.reduce((best, column) => (column.offsetHeight < best.offsetHeight ? column : best), columns[0]);
+      shortest.appendChild(card);
+    });
   }
 
   function createCard(entry) {

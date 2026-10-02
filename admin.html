@@ -9,7 +9,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/admin.css">
-<link rel="stylesheet" href="css/admin-workspace.css">
 </head>
 <body class="admin-page">
 <main class="admin-shell">
@@ -28,19 +27,9 @@
     <p class="admin-help">Before using the editors, run <code>supabase/schema.sql</code> in your Supabase SQL editor and create <code>js/supabase-config.js</code> from the example file.</p>
   </section>
 
-  <section id="login-panel" class="admin-card" hidden>
-    <h2>sign in</h2>
-    <form id="login-form" class="admin-form">
-      <label>Email<input type="email" name="email" autocomplete="username" required></label>
-      <label>Password<input type="password" name="password" autocomplete="current-password" required></label>
-      <button class="btn" type="submit">sign in →</button>
-      <p id="login-message" class="admin-message" role="status"></p>
-    </form>
-  </section>
-
   <div class="admin-workspace">
     <aside id="dashboard" class="admin-sidebar" hidden>
-      <div class="admin-sidebar-label">WORKSPACE</div>
+      <div class="admin-brand"><span class="admin-brand-mark" aria-hidden="true"></span><div class="admin-brand-name"><strong>Rikitoism</strong><span>backstage</span></div></div>
       <nav class="admin-module-grid" aria-label="Admin editors">
         <button class="admin-module" type="button" data-open-editor="admin-home"><span class="admin-module-glyph" aria-hidden="true">⌂</span><span class="admin-module-name">Overview</span></button>
         <button class="admin-module" type="button" data-open-editor="guestbook-editor"><span class="admin-module-glyph" aria-hidden="true">♡</span><span class="admin-module-name">Guestbook</span><span id="guestbook-rail-badge" class="admin-rail-badge" hidden>0</span></button>
@@ -59,7 +48,7 @@
 
     <div class="admin-content">
       <section id="login-panel" class="admin-card" hidden>
-        <p class="admin-kicker">PRIVATE WORKSPACE</p>
+        <p class="admin-kicker">Private workspace</p>
         <h2>Sign in to backstage</h2>
         <p class="admin-help">Your publishing tools are only available to your admin account.</p>
         <form id="login-form" class="admin-form">
@@ -71,12 +60,21 @@
       </section>
 
       <section id="admin-home" class="admin-card admin-home" hidden>
-        <p class="admin-kicker">RIKITOISM / BACKSTAGE</p>
+        <p class="admin-kicker">Backstage</p>
         <h2>Your writing room.</h2>
-        <p class="admin-home-copy">Choose a section from the rail to edit, review, and publish.</p>
+        <p class="admin-home-copy">Pick a section on the left, or jump straight in below.</p>
         <div class="admin-home-actions">
           <button class="btn" type="button" data-open-editor="journal-editor">Write a journal entry <span aria-hidden="true">→</span></button>
           <button class="btn btn-outline" type="button" data-open-editor="guestbook-editor">Review guestbook notes <span aria-hidden="true">→</span></button>
+        </div>
+        <div class="admin-home-grid">
+          <button class="admin-tile" type="button" data-open-editor="journal-editor"><strong>Journal</strong><span>Write, edit and publish entries</span></button>
+          <button class="admin-tile" type="button" data-open-editor="guestbook-editor"><strong>Guestbook</strong><span>Approve, reply to or hide notes</span></button>
+          <button class="admin-tile" type="button" data-open-editor="memory-editor"><strong>Memories</strong><span>Albums and their photos</span></button>
+          <button class="admin-tile" type="button" data-open-editor="timeline-editor"><strong>Timeline</strong><span>Events on the memories page</span></button>
+          <button class="admin-tile" type="button" data-open-editor="influence-editor"><strong>Influences</strong><span>Interests, playlists, songs and more</span></button>
+          <button class="admin-tile" type="button" data-open-editor="creation-editor"><strong>Creations</strong><span>Projects, writing and experiments</span></button>
+          <button class="admin-tile" type="button" data-open-editor="me-timeline-editor"><strong>Me timeline</strong><span>Milestones on the me page</span></button>
         </div>
       </section>
 
@@ -224,5 +222,12 @@
 <script src="js/supabase-client.js"></script>
 <script src="js/admin.js"></script>
 <script src="js/guestbook-admin.js"></script>
+<script>
+// phone: keep the active section pill in view in the scrolling top bar
+new MutationObserver((records) => {
+  const active = records.map((r) => r.target).find((el) => el.getAttribute('aria-current') === 'page');
+  if (active && window.matchMedia('(max-width: 820px)').matches) active.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+}).observe(document.getElementById('dashboard'), { attributes: true, attributeFilter: ['aria-current'], subtree: true });
+</script>
 </body>
 </html>

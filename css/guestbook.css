@@ -70,7 +70,10 @@
 .guestbook-filter{ padding:6px 11px; border:1px solid var(--line); border-radius:99px; background:transparent; color:var(--ink-soft); font:600 .8rem var(--font-body); cursor:pointer; transition:background .15s ease,color .15s ease,border-color .15s ease; }
 .guestbook-filter:hover,.guestbook-filter.is-active{ border-color:var(--ink); background:var(--ink); color:var(--paper-3); }
 .guestbook-filter:focus-visible{ outline:3px solid var(--denim); outline-offset:2px; }
-.guestbook-grid{ columns:3 270px; column-gap:18px; column-fill:balance; }
+.guestbook-grid{ display:grid; grid-template-columns:repeat(var(--wall-cols,3),minmax(0,1fr)); gap:18px; align-items:start; }
+.guestbook-grid > .feed-status,.guestbook-grid > .guestbook-empty{ grid-column:1 / -1; }
+.guestbook-column{ display:flex; flex-direction:column; gap:18px; min-width:0; }
+.guestbook-column .guestbook-card{ display:block; margin:0; }
 .guestbook-card{ --card-paper:#fffdf8; display:inline-block; vertical-align:top; width:100%; min-width:0; margin:0 0 18px; padding:17px 18px 15px; break-inside:avoid; border:1px solid rgba(42,36,31,.4); border-radius:4px; background:var(--card-paper); color:var(--ink); box-shadow:3px 4px 0 var(--shadow-soft); animation:guestbook-arrive .4s ease both; }
 .guestbook-card-opinion{ --card-paper:var(--denim-soft); }
 .guestbook-card-appreciation{ --card-paper:var(--sage-soft); }
@@ -98,7 +101,6 @@
   .guestbook-composer{ padding:17px 15px 15px; }
   .guestbook-types{ gap:5px; }
   .guestbook-types label span{ padding:5px 7px; font-size:.72rem; }
-  .guestbook-grid{ columns:1; }
   .guestbook-wall-heading{ align-items:flex-start; flex-direction:column; gap:5px; }
   .guestbook-wall.block{ margin-top:38px; }
 }
