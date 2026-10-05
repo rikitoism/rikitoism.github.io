@@ -28,7 +28,7 @@
   const hrefFor = (file) => (file === 'index' ? './' : file);
   const nav = links.map(([file, label]) => `<a href="${hrefFor(file)}"${label === active ? ' class="active"' : ''}>${label}</a>`).join('');
   const header = `<header class="site-header"><a href="./" class="brand"><span class="dot"></span>Rikitoism <small>· story worth telling</small></a><button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open navigation"><span></span><span></span><span></span></button><nav class="site-nav" id="site-nav" aria-label="Main">${nav}</nav></header>`;
-  const footer = '<footer class="site-footer"><span class="scribble">made with late nights &amp; questionable css</span><span>© <span id="year"></span> · <a href="archive">everything, archived</a></span></footer>';
+  const footer = '<footer class="site-footer"><span class="scribble">made with late nights &amp; questionable css</span><span>© <span id="year"></span> · <a href="archive">everything, archived</a> · <a href="admin" class="footer-admin">admin</a></span></footer>';
   const existingHeader = document.querySelector('header.site-header');
   const existingFooter = document.querySelector('footer.site-footer');
   if (existingHeader) existingHeader.outerHTML = header;

@@ -108,25 +108,68 @@
       <div><h3>Project body</h3><div id="creation-blocks" class="creation-block-editor"></div><button id="add-creation-block" class="btn btn-outline" type="button">add block</button></div>
       <div class="editor-actions"><button class="btn" type="submit">save creation →</button><button class="btn btn-outline" type="button" data-cancel-form="creation-form">back to creations</button><span id="creation-form-message" class="admin-message"></span></div>
     </form>
-    <div class="editor-list-wrap"><h3>saved creations</h3><div id="creation-list-admin" class="editor-list"></div></div>
+    <div class="editor-list-wrap">
+      <div class="guestbook-view-toolbar creation-filter-bar">
+        <div class="guestbook-view-tabs" role="group" aria-label="Creation status">
+          <button type="button" data-creation-view="all" aria-pressed="true">All</button>
+          <button type="button" data-creation-view="published" aria-pressed="false">Published</button>
+          <button type="button" data-creation-view="draft" aria-pressed="false">Drafts</button>
+        </div>
+        <div class="guestbook-view-filters">
+          <label class="sr-only" for="creation-admin-search">Search creations</label>
+          <input id="creation-admin-search" type="search" placeholder="Search creations">
+          <label class="sr-only" for="creation-admin-category">Filter by category</label>
+          <select id="creation-admin-category"><option value="all">All categories</option></select>
+          <label class="sr-only" for="creation-admin-sort">Sort creations</label>
+          <select id="creation-admin-sort"><option value="updated">Recently updated</option><option value="oldest">Oldest first</option><option value="title">Title A–Z</option><option value="featured">Featured first</option></select>
+        </div>
+      </div>
+      <p id="creation-admin-count" class="admin-help creation-count" aria-live="polite"></p>
+      <div id="creation-list-admin" class="editor-list"></div>
+    </div>
   </section>
 
   <section id="influence-editor" class="admin-card editor-panel" hidden>
-    <div class="admin-toolbar"><div><p class="eyebrow-tag">third editor</p><h2>influences</h2></div></div>
-    <p class="admin-help">Choose a collection to edit. Delete actions require password confirmation.</p>
-    <div class="influence-new-row">
-      <button class="btn" type="button" data-new-influence="interest">new interest</button>
-      <button class="btn btn-outline" type="button" data-new-influence="playlist">new playlist</button>
-      <button class="btn btn-outline" type="button" data-new-influence="song">new song</button>
-      <button class="btn btn-outline" type="button" data-new-influence="shaped">new shaped item</button>
+    <div class="admin-toolbar"><div><h2>influences</h2><p class="admin-help">Four collections on the influences page. Deleting asks for your password.</p></div></div>
+    <div class="guestbook-view-tabs influence-tabs" role="group" aria-label="Influence collections">
+      <button type="button" data-influence-tab="interest" aria-pressed="true">Core interests <span class="tab-count" data-influence-count="interest"></span></button><button type="button" data-influence-tab="playlist" aria-pressed="false">Playlists <span class="tab-count" data-influence-count="playlist"></span></button><button type="button" data-influence-tab="song" aria-pressed="false">Songs <span class="tab-count" data-influence-count="song"></span></button><button type="button" data-influence-tab="shaped" aria-pressed="false">Shaped me <span class="tab-count" data-influence-count="shaped"></span></button>
     </div>
-    <div class="influence-admin-grid">
-      <form id="interest-form" class="admin-form editor-form"><h3>Core interest</h3><input type="hidden" name="id"><label>Meta<input name="eyebrow"></label><label>Title<input name="title" required></label><label>Description<textarea name="description" data-markdown></textarea></label><label>Tags <span class="field-note">comma separated</span><input name="tags"></label><button class="btn" type="submit">save interest →</button><span id="interest-message" class="admin-message"></span></form>
-      <form id="playlist-form" class="admin-form editor-form"><h3>Playlist</h3><input type="hidden" name="id"><label>Meta<input name="eyebrow"></label><label>Name<input name="title" required></label><label>Description<textarea name="description" data-markdown></textarea></label><label>Image URL<input type="url" name="image_url"></label><label>Or upload image<input type="file" name="image_file" accept="image/*"></label><label>Playlist URL<input type="url" name="playlist_url"></label><button class="btn" type="submit">save playlist →</button><span id="playlist-message" class="admin-message"></span></form>
-      <form id="song-form" class="admin-form editor-form"><h3>Returning song</h3><input type="hidden" name="id"><label>Song title<input name="title" required></label><label>Artist<input name="artist"></label><label>Note<textarea name="description" data-markdown></textarea></label><label>Image URL<input type="url" name="image_url"></label><label>Or upload image<input type="file" name="image_file" accept="image/*"></label><label>Song URL<input type="url" name="song_url"></label><button class="btn" type="submit">save song →</button><span id="song-message" class="admin-message"></span></form>
-      <form id="shaped-form" class="admin-form editor-form"><h3>Thing that shaped me</h3><input type="hidden" name="id"><label>Type<input name="medium" placeholder="movie, book, anime..."></label><label>Title<input name="title" required></label><label>Short description<textarea name="short_description" data-markdown></textarea></label><label>Reflection<textarea name="reflection" data-markdown></textarea></label><label>Image URL<input type="url" name="image_url"></label><label>Or upload image<input type="file" name="image_file" accept="image/*"></label><label>External link<input type="url" name="link_url"></label><button class="btn" type="submit">save influence →</button><span id="shaped-message" class="admin-message"></span></form>
+    
+    <div class="influence-section" data-influence-section="interest">
+      <div class="influence-section-head">
+        <div><h3>Core interests</h3><p class="admin-help">The cards at the top of the page.</p></div>
+        <button class="btn" type="button" data-new-influence="interest">New interest</button>
+      </div>
+      <form id="interest-form" class="admin-form editor-form"><input type="hidden" name="id"><label>Meta<input name="eyebrow"></label><label>Title<input name="title" required></label><label>Description<textarea name="description" data-markdown></textarea></label><label>Tags <span class="field-note">comma separated</span><input name="tags"></label><div class="editor-actions"><button class="btn" type="submit">save interest →</button><span id="interest-message" class="admin-message"></span></div></form>
+      <div class="editor-list-wrap"><div id="interest-list-admin" class="editor-list"></div></div>
     </div>
-    <div id="influence-admin-lists" class="editor-list-wrap"></div>
+    
+    <div class="influence-section" data-influence-section="playlist" hidden>
+      <div class="influence-section-head">
+        <div><h3>Playlists</h3><p class="admin-help">Background noise, mostly. The first three show on the page.</p></div>
+        <button class="btn" type="button" data-new-influence="playlist">New playlist</button>
+      </div>
+      <form id="playlist-form" class="admin-form editor-form"><input type="hidden" name="id"><label>Meta<input name="eyebrow"></label><label>Name<input name="title" required></label><label>Description<textarea name="description" data-markdown></textarea></label><label>Image URL<input type="url" name="image_url"></label><label>Or upload image<input type="file" name="image_file" accept="image/*"></label><label>Playlist URL<input type="url" name="playlist_url"></label><div class="editor-actions"><button class="btn" type="submit">save playlist →</button><span id="playlist-message" class="admin-message"></span></div></form>
+      <div class="editor-list-wrap"><div id="playlist-list-admin" class="editor-list"></div></div>
+    </div>
+    
+    <div class="influence-section" data-influence-section="song" hidden>
+      <div class="influence-section-head">
+        <div><h3>Songs that define me</h3><p class="admin-help">Short notes with the song they belong to.</p></div>
+        <button class="btn" type="button" data-new-influence="song">New song</button>
+      </div>
+      <form id="song-form" class="admin-form editor-form"><input type="hidden" name="id"><label>Song title<input name="title" required></label><label>Artist<input name="artist"></label><label>Note<textarea name="description" data-markdown></textarea></label><label>Image URL<input type="url" name="image_url"></label><label>Or upload image<input type="file" name="image_file" accept="image/*"></label><label>Song URL<input type="url" name="song_url"></label><div class="editor-actions"><button class="btn" type="submit">save song →</button><span id="song-message" class="admin-message"></span></div></form>
+      <div class="editor-list-wrap"><div id="song-list-admin" class="editor-list"></div></div>
+    </div>
+    
+    <div class="influence-section" data-influence-section="shaped" hidden>
+      <div class="influence-section-head">
+        <div><h3>Part of my identity</h3><p class="admin-help">Books, films and anime that changed something.</p></div>
+        <button class="btn" type="button" data-new-influence="shaped">New item</button>
+      </div>
+      <form id="shaped-form" class="admin-form editor-form"><input type="hidden" name="id"><label>Type<input name="medium" placeholder="movie, book, anime..."></label><label>Title<input name="title" required></label><label>Short description<textarea name="short_description" data-markdown></textarea></label><label>Reflection<textarea name="reflection" data-markdown></textarea></label><label>Image URL<input type="url" name="image_url"></label><label>Or upload image<input type="file" name="image_file" accept="image/*"></label><label>External link<input type="url" name="link_url"></label><div class="editor-actions"><button class="btn" type="submit">save item →</button><span id="shaped-message" class="admin-message"></span></div></form>
+      <div class="editor-list-wrap"><div id="shaped-list-admin" class="editor-list"></div></div>
+    </div>
   </section>
 
   <section id="journal-editor" class="admin-card editor-panel" hidden>

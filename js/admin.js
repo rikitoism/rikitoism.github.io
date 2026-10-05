@@ -37,6 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
   memoryEditor.querySelector('.divider')?.remove();
   document.querySelector('.admin-content').insertBefore(timelinePanel, document.getElementById('guestbook-editor'));
   const supabaseState = window.soulSupabase;
+  let workspaceOpen = false;   // true once the signed-in workspace is on screen
+  let activeUserId = null;     // who the workspace was opened for
   const editorPanels = [...document.querySelectorAll('.editor-panel')];
   const editorFormLists = new Map();
   const routeToPanel = {
@@ -96,10 +98,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (list) list.hidden = true;
     form.hidden = false;
     form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    saveDraft(form);
   }
 
   function showEditorList(form) {
     form.hidden = true;
+    clearDraft(form);
     const list = editorFormLists.get(form);
     if (list) list.hidden = false;
   }
@@ -114,6 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
       list.hidden = false;
     });
     editor.hidden = false;
+    if (supabaseState?.client) restoreDrafts(editor);
     document.querySelectorAll('.admin-module[data-open-editor]').forEach((button) => {
       if (button.dataset.openEditor === activeId) button.setAttribute('aria-current', 'page');
       else button.removeAttribute('aria-current');
@@ -126,11 +131,14 @@ document.addEventListener('DOMContentLoaded', () => {
       if (editor === timelinePanel) loadTimelineEvents();
       if (editor.id === 'creation-editor') loadCreations();
       if (editor === meTimelineEditor) loadMeTimeline();
+      if (editor.id === 'influence-editor') loadInfluenceLists();
     }
   }
 
   function openRouteFromHash() {
-    const activeId = routeToPanel[window.location.hash.slice(1)] || 'admin-home';
+    const hash = window.location.hash.slice(1);
+    const lastPanel = !hash && supabaseState?.client ? readDrafts().last?.panelId : null;
+    const activeId = routeToPanel[hash] || lastPanel || 'admin-home';
     openEditorPanel(activeId, false);
   }
 
@@ -150,6 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const showLogin = () => {
     document.body.classList.remove('admin-authenticated');
+    workspaceOpen = false;
     loginPanel.hidden = false;
     dashboard.hidden = true;
     adminHome.hidden = true;
@@ -178,8 +187,17 @@ document.addEventListener('DOMContentLoaded', () => {
   showLogin();
 
   supabaseState.client.auth.onAuthStateChange((_event, session) => {
-    if (session) showWorkspace();
-    else showLogin();
+    if (!session) {
+      activeUserId = null;
+      showLogin();
+      return;
+    }
+    // Supabase fires SIGNED_IN / TOKEN_REFRESHED again whenever the tab regains focus, and the
+    // delete-password check signs in a second time. Re-opening the workspace on those events is
+    // what threw you back to the overview and closed the form you were editing.
+    if (workspaceOpen && activeUserId === session.user.id) return;
+    activeUserId = session.user.id;
+    showWorkspace();
   });
 
   loginForm.addEventListener('submit', async (event) => {
@@ -194,6 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   logoutButton.addEventListener('click', async () => {
+    clearAllDrafts();
     const { error } = await supabaseState.client.auth.signOut();
     if (error) loginMessage.textContent = error.message;
     showLogin();
@@ -217,6 +236,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function showWorkspace() {
+    if (workspaceOpen) return;
+    workspaceOpen = true;
     document.body.classList.add('admin-authenticated');
     loginPanel.hidden = true;
     dashboard.hidden = false;
@@ -584,12 +605,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  let journalLoadVersion = 0;
   async function loadJournalEntries() {
-    journalList.replaceChildren();
+    const version = ++journalLoadVersion;
     const { data, error } = await supabaseState.client
       .from('journal_entries')
       .select('id,title,slug,status,updated_at')
       .order('updated_at', { ascending: false });
+    if (version !== journalLoadVersion) return;   // a newer load is already on its way
     if (error) {
       journalList.textContent = error.message;
       return;
@@ -598,7 +621,7 @@ document.addEventListener('DOMContentLoaded', () => {
       journalList.textContent = 'No entries yet. Start with the form above.';
       return;
     }
-    data.forEach((entry) => {
+    journalList.replaceChildren(...data.map((entry) => {
       const item = document.createElement('div');
       item.className = 'editor-list-item';
       const details = document.createElement('button');
@@ -619,8 +642,8 @@ document.addEventListener('DOMContentLoaded', () => {
       actions.className = 'editor-item-actions';
       actions.append(remove);
       item.append(details, actions);
-      journalList.appendChild(item);
-    });
+      return item;
+    }));
   }
 
   async function deleteJournalEntry(id, title) {
@@ -747,21 +770,74 @@ document.addEventListener('DOMContentLoaded', () => {
     creationMessage.textContent = error ? error.message : 'creation saved.';
     if (!error) { creationForm.reset(); creationForm.elements.id.value = ''; creationBlocks.replaceChildren(); addCreationBlock(); showEditorList(creationForm); loadCreations(); }
   }
+  // ---- creations: status tabs, search, category and sort (same idea as the guestbook) ----
+  let creationEntries = [];
+  let creationLoadVersion = 0;
+  const creationFilter = { view: 'all', query: '', category: 'all', sort: 'updated' };
+  const creationViewTabs = [...document.querySelectorAll('[data-creation-view]')];
+  const creationSearch = document.getElementById('creation-admin-search');
+  const creationCategory = document.getElementById('creation-admin-category');
+  const creationSort = document.getElementById('creation-admin-sort');
+  const creationCount = document.getElementById('creation-admin-count');
+  const creationCategoryLabels = {};
+  if (creationForm) {
+    [...creationForm.elements.category.options].forEach((option) => {
+      creationCategoryLabels[option.value] = option.textContent;
+      if (creationCategory) creationCategory.append(new Option(option.textContent, option.value));
+    });
+  }
+  creationViewTabs.forEach((tab) => tab.addEventListener('click', () => {
+    creationFilter.view = tab.dataset.creationView;
+    creationViewTabs.forEach((item) => item.setAttribute('aria-pressed', String(item === tab)));
+    renderCreations();
+  }));
+  creationSearch?.addEventListener('input', () => { creationFilter.query = creationSearch.value.trim().toLowerCase(); renderCreations(); });
+  creationCategory?.addEventListener('change', () => { creationFilter.category = creationCategory.value; renderCreations(); });
+  creationSort?.addEventListener('change', () => { creationFilter.sort = creationSort.value; renderCreations(); });
+
   async function loadCreations() {
     if (!creationList) return;
-    creationList.replaceChildren();
+    const version = ++creationLoadVersion;
     const { data, error } = await supabaseState.client.from('creations').select('*').order('updated_at', { ascending: false });
+    if (version !== creationLoadVersion) return;   // a newer load is already on its way
     if (error) { creationList.textContent = error.message; return; }
-    (data || []).forEach((entry) => {
+    creationEntries = data || [];
+    renderCreations();
+  }
+  function renderCreations() {
+    if (!creationList) return;
+    const { view, query, category, sort } = creationFilter;
+    const stamp = (entry) => new Date(entry.updated_at || entry.created_at || 0).getTime();
+    const visible = creationEntries.filter((entry) => {
+      if (view !== 'all' && entry.status !== view) return false;
+      if (category !== 'all' && entry.category !== category) return false;
+      if (!query) return true;
+      return `${entry.title} ${entry.short_description || ''} ${entry.status_label || ''} ${(entry.tags || []).join(' ')}`.toLowerCase().includes(query);
+    }).sort((a, b) => {
+      if (sort === 'title') return String(a.title).localeCompare(String(b.title));
+      if (sort === 'oldest') return stamp(a) - stamp(b);
+      if (sort === 'featured') return (Number(Boolean(b.featured)) - Number(Boolean(a.featured))) || (stamp(b) - stamp(a));
+      return stamp(b) - stamp(a);
+    });
+    if (creationCount) creationCount.textContent = visible.length === creationEntries.length ? `${creationEntries.length} ${creationEntries.length === 1 ? 'creation' : 'creations'}` : `${visible.length} of ${creationEntries.length}`;
+    if (!visible.length) {
+      const note = document.createElement('p');
+      note.className = 'admin-help';
+      note.textContent = creationEntries.length ? 'No creations match these filters.' : 'No creations yet. Add the first one with “New creation”.';
+      creationList.replaceChildren(note);
+      return;
+    }
+    creationList.replaceChildren(...visible.map((entry) => {
       const row = document.createElement('div'); row.className = 'editor-list-item';
       const details = document.createElement('button'); details.className = 'editor-row-main'; details.type = 'button';
       const title = document.createElement('strong'); title.textContent = entry.title;
-      const meta = document.createElement('small'); meta.textContent = `${entry.category} · ${entry.status}`;
+      const meta = document.createElement('small'); meta.textContent = `${creationCategoryLabels[entry.category] || entry.category} · ${entry.status}${entry.featured ? ' · featured' : ''}`;
       details.append(title, meta); details.addEventListener('click', () => fillCreation(entry));
       const actions = document.createElement('div'); actions.className = 'editor-item-actions';
       const remove = document.createElement('button'); remove.className = 'btn btn-danger'; remove.type = 'button'; remove.textContent = 'delete'; remove.onclick = () => deleteCreation(entry);
-      actions.append(remove); row.append(details, actions); creationList.appendChild(row);
-    });
+      actions.append(remove); row.append(details, actions);
+      return row;
+    }));
   }
   function fillCreation(entry) {
     creationForm.elements.id.value = entry.id; ['title', 'slug', 'category', 'status_label', 'short_description', 'cover_image', 'project_url', 'github_url', 'status'].forEach((name) => { creationForm.elements[name].value = entry[name] || ''; });
@@ -781,14 +857,23 @@ document.addEventListener('DOMContentLoaded', () => {
     creationMessage.textContent = error ? error.message : 'Creation deleted.'; if (!error) loadCreations();
   }
 
+  // ---- influences: one nav item, four sections (interests, playlists, songs, shaped) ----
   const influenceTables = {
-    interest: { table: 'core_interests', form: document.getElementById('interest-form'), fields: ['eyebrow', 'title', 'description', 'tags'] },
-    playlist: { table: 'playlists', form: document.getElementById('playlist-form'), fields: ['eyebrow', 'title', 'description', 'image_url', 'playlist_url'] },
-    song: { table: 'songs', form: document.getElementById('song-form'), fields: ['title', 'artist', 'description', 'image_url', 'song_url'] },
-    shaped: { table: 'shaped_items', form: document.getElementById('shaped-form'), fields: ['medium', 'title', 'short_description', 'reflection', 'image_url', 'link_url'] }
+    interest: { table: 'core_interests', form: document.getElementById('interest-form'), list: document.getElementById('interest-list-admin'), fields: ['eyebrow', 'title', 'description', 'tags'], meta: (entry) => (entry.tags || []).join(', ') || entry.eyebrow || '', newLabel: 'New interest' },
+    playlist: { table: 'playlists', form: document.getElementById('playlist-form'), list: document.getElementById('playlist-list-admin'), fields: ['eyebrow', 'title', 'description', 'image_url', 'playlist_url'], meta: (entry) => entry.eyebrow || '', newLabel: 'New playlist' },
+    song: { table: 'songs', form: document.getElementById('song-form'), list: document.getElementById('song-list-admin'), fields: ['title', 'artist', 'description', 'image_url', 'song_url'], meta: (entry) => entry.artist || '', newLabel: 'New song' },
+    shaped: { table: 'shaped_items', form: document.getElementById('shaped-form'), list: document.getElementById('shaped-list-admin'), fields: ['medium', 'title', 'short_description', 'reflection', 'image_url', 'link_url'], meta: (entry) => entry.medium || '', newLabel: 'New item' }
   };
-  const influenceList = document.getElementById('influence-admin-lists');
-  Object.values(influenceTables).forEach((config) => configureEditorForm(config.form, influenceList));
+  const influenceTabs = [...document.querySelectorAll('[data-influence-tab]')];
+  const influenceSections = [...document.querySelectorAll('[data-influence-section]')];
+  function showInfluenceSection(kind) {
+    const active = influenceTables[kind] ? kind : 'interest';
+    influenceTabs.forEach((tab) => tab.setAttribute('aria-pressed', String(tab.dataset.influenceTab === active)));
+    influenceSections.forEach((section) => { section.hidden = section.dataset.influenceSection !== active; });
+    rememberUi('influenceSection', active);
+  }
+  influenceTabs.forEach((tab) => tab.addEventListener('click', () => showInfluenceSection(tab.dataset.influenceTab)));
+  Object.values(influenceTables).forEach((config) => configureEditorForm(config.form, config.list.closest('.editor-list-wrap')));
   document.querySelectorAll('[data-new-influence]').forEach((button) => button.addEventListener('click', () => {
     const form = influenceTables[button.dataset.newInfluence]?.form;
     if (!form) return;
@@ -816,28 +901,167 @@ document.addEventListener('DOMContentLoaded', () => {
       const query = id ? supabaseState.client.from(config.table).update(values).eq('id', id) : supabaseState.client.from(config.table).insert(values);
       const { error } = await query;
       config.form.querySelector('.admin-message').textContent = error ? error.message : 'saved.';
-      if (!error) { config.form.reset(); config.form.elements.id.value = ''; showEditorList(config.form); loadInfluenceLists(); }
+      if (!error) { config.form.reset(); config.form.elements.id.value = ''; showEditorList(config.form); loadInfluenceKind(kind); }
     });
   });
-  async function loadInfluenceLists() {
-    const list = document.getElementById('influence-admin-lists');
-    if (!list) return;
-    list.replaceChildren();
-    for (const [kind, config] of Object.entries(influenceTables)) {
-      const { data } = await supabaseState.client.from(config.table).select('*').order('sort_order');
-      const heading = document.createElement('h3'); heading.textContent = kind; list.appendChild(heading);
-      (data || []).forEach((entry) => {
-        const row = document.createElement('div'); row.className = 'editor-list-item';
-        const text = document.createElement('button'); text.className = 'editor-row-main'; text.type = 'button';
-        const title = document.createElement('strong'); title.textContent = entry.title;
-        const meta = document.createElement('small'); meta.textContent = kind;
-        text.append(title, meta); text.onclick = () => { config.form.elements.id.value = entry.id; config.fields.forEach((field) => { config.form.elements[field].value = Array.isArray(entry[field]) ? entry[field].join(', ') : (entry[field] || ''); }); refreshMarkdownPreviews(config.form); showEditorForm(config.form); };
-        const actions = document.createElement('div'); actions.className = 'editor-item-actions';
-        const remove = document.createElement('button'); remove.className = 'btn btn-danger'; remove.type = 'button'; remove.textContent = 'delete'; remove.onclick = async () => { const password = window.prompt('Enter your admin password to confirm deletion:'); if (!password) return; const { data: user } = await supabaseState.client.auth.getUser(); const auth = await supabaseState.client.auth.signInWithPassword({ email: user.user.email, password }); if (auth.error) return window.alert('Password verification failed.'); const result = await supabaseState.client.from(config.table).delete().eq('id', entry.id); if (result.error) window.alert(result.error.message); else loadInfluenceLists(); };
-        actions.append(remove); row.append(text, actions); list.appendChild(row);
+  const influenceLoadVersions = {};
+  async function loadInfluenceKind(kind) {
+    const config = influenceTables[kind];
+    if (!config?.list) return;
+    const version = (influenceLoadVersions[kind] || 0) + 1;
+    influenceLoadVersions[kind] = version;
+    const { data, error } = await supabaseState.client.from(config.table).select('*').order('sort_order');
+    if (version !== influenceLoadVersions[kind]) return;   // a newer load is already on its way
+    const count = document.querySelector(`[data-influence-count="${kind}"]`);
+    if (error) { config.list.textContent = error.message; return; }
+    const entries = data || [];
+    if (count) count.textContent = entries.length;
+    if (!entries.length) { config.list.textContent = `Nothing here yet. Use “${config.newLabel}” to add one.`; return; }
+    config.list.replaceChildren(...entries.map((entry) => {
+      const row = document.createElement('div'); row.className = 'editor-list-item';
+      const text = document.createElement('button'); text.className = 'editor-row-main'; text.type = 'button';
+      const title = document.createElement('strong'); title.textContent = entry.title;
+      const meta = document.createElement('small'); meta.textContent = config.meta(entry);
+      text.append(title, meta);
+      text.onclick = () => {
+        config.form.elements.id.value = entry.id;
+        config.fields.forEach((field) => { config.form.elements[field].value = Array.isArray(entry[field]) ? entry[field].join(', ') : (entry[field] || ''); });
+        refreshMarkdownPreviews(config.form);
+        showEditorForm(config.form);
+      };
+      const actions = document.createElement('div'); actions.className = 'editor-item-actions';
+      const remove = document.createElement('button'); remove.className = 'btn btn-danger'; remove.type = 'button'; remove.textContent = 'delete';
+      remove.onclick = async () => {
+        const password = window.prompt('Enter your admin password to confirm deletion:'); if (!password) return;
+        const { data: user } = await supabaseState.client.auth.getUser();
+        const auth = await supabaseState.client.auth.signInWithPassword({ email: user.user.email, password });
+        if (auth.error) return window.alert('Password verification failed.');
+        const result = await supabaseState.client.from(config.table).delete().eq('id', entry.id);
+        if (result.error) window.alert(result.error.message); else loadInfluenceKind(kind);
+      };
+      actions.append(remove); row.append(text, actions);
+      return row;
+    }));
+  }
+  function loadInfluenceLists() { return Promise.all(Object.keys(influenceTables).map(loadInfluenceKind)); }
+
+  // ---- unsaved work: keep an open editor alive across tab / app switches and reloads ----
+  // Phones often discard a background tab, so the page reloads when you come back. Everything typed
+  // into an open form is copied to localStorage as you type and put back when its panel opens.
+  const DRAFT_KEY = 'rikitoism-admin-drafts-v1';
+  const DRAFT_MAX_AGE = 14 * 24 * 60 * 60 * 1000;
+  const draftForms = [journalForm, memoryForm, timelineForm, meTimelineForm, creationForm, ...Object.values(influenceTables).map((config) => config.form)].filter(Boolean);
+  let draftsRestoring = false;
+  let draftTimer = null;
+  const dirtyForms = new Set();
+
+  // The form's own id attribute: form.id would return the <input name="id"> inside each form.
+  const formKey = (form) => form.getAttribute('id');
+
+  function readDrafts() {
+    try {
+      const stored = JSON.parse(window.localStorage.getItem(DRAFT_KEY)) || {};
+      const forms = stored.forms || {};
+      Object.keys(forms).forEach((id) => { if (Date.now() - (forms[id].savedAt || 0) > DRAFT_MAX_AGE) delete forms[id]; });
+      return { forms, last: stored.last || null, ui: stored.ui || {} };
+    } catch (error) { return { forms: {}, last: null, ui: {} }; }
+  }
+  function writeDrafts(drafts) {
+    try { window.localStorage.setItem(DRAFT_KEY, JSON.stringify(drafts)); } catch (error) { /* storage full or blocked: editing still works */ }
+  }
+  function clearAllDrafts() {
+    try { window.localStorage.removeItem(DRAFT_KEY); } catch (error) { /* ignore */ }
+  }
+  function rememberUi(key, value) {
+    if (!supabaseState?.client) return;
+    const drafts = readDrafts();
+    drafts.ui[key] = value;
+    writeDrafts(drafts);
+  }
+  function captureForm(form) {
+    const values = {};
+    [...form.elements].forEach((element) => {
+      if (!element.name || ['file', 'password', 'submit', 'button'].includes(element.type)) return;
+      if (element.closest('#memory-photo-fields, #creation-blocks')) return;   // dynamic rows are saved separately
+      if (element.type === 'checkbox') values[element.name] = element.checked;
+      else if (element.type !== 'radio' || element.checked) values[element.name] = element.value;
+    });
+    const draft = { values, panelId: form.closest('.editor-panel')?.id || null, savedAt: Date.now() };
+    if (form === memoryForm) draft.photos = [...memoryPhotoFields.querySelectorAll('.memory-photo-field')].map((field) => ({ image_url: field.querySelector('[name="photo_url"]').value }));
+    if (form === creationForm) draft.blocks = [...creationBlocks.querySelectorAll('.creation-block-field')].map((field) => ({ type: field.querySelector('[name="block_type"]').value, url: field.querySelector('[name="block_url"]').value, content: field.querySelector('[name="block_content"]').value }));
+    return draft;
+  }
+  function saveDraft(form) {
+    if (!supabaseState?.client || draftsRestoring || !form || form.hidden) return;
+    const drafts = readDrafts();
+    const draft = captureForm(form);
+    drafts.forms[formKey(form)] = draft;
+    drafts.last = { panelId: draft.panelId, formId: formKey(form) };
+    writeDrafts(drafts);
+  }
+  function clearDraft(form) {
+    if (!supabaseState?.client || !form || !formKey(form)) return;
+    dirtyForms.delete(form);
+    const drafts = readDrafts();
+    delete drafts.forms[formKey(form)];
+    if (drafts.last?.formId === formKey(form)) drafts.last = null;
+    writeDrafts(drafts);
+  }
+  function saveDraftSoon(form) {
+    dirtyForms.add(form);
+    window.clearTimeout(draftTimer);
+    draftTimer = window.setTimeout(flushDrafts, 350);
+  }
+  function flushDrafts() {
+    window.clearTimeout(draftTimer);
+    dirtyForms.forEach((form) => saveDraft(form));
+    dirtyForms.clear();
+  }
+  function applyDraft(form, draft) {
+    draftsRestoring = true;
+    try {
+      form.reset();
+      Object.entries(draft.values || {}).forEach(([name, value]) => {
+        const field = form.elements[name];
+        if (!field || typeof field.length === 'number' && field.tagName !== 'SELECT') return;
+        if (field.type === 'checkbox') field.checked = Boolean(value); else field.value = value;
       });
+      if (form === memoryForm) {
+        memoryPhotoFields.replaceChildren();
+        (draft.photos?.length ? draft.photos : [{}]).forEach((photo) => addMemoryPhotoField(photo));
+      }
+      if (form === creationForm) {
+        creationBlocks.replaceChildren();
+        (draft.blocks?.length ? draft.blocks : [{ type: 'text', content: '' }]).forEach((block) => addCreationBlock(block));
+      }
+      refreshMarkdownPreviews(form);
+      if (form === journalForm) renderJournalPreview();
+      const kind = Object.keys(influenceTables).find((key) => influenceTables[key].form === form);
+      if (kind) showInfluenceSection(kind);
+      const list = editorFormLists.get(form);
+      if (list) list.hidden = true;
+      form.hidden = false;
+      const message = form.querySelector('.admin-message');
+      if (message) message.textContent = 'Restored your unsaved draft.';
+    } finally {
+      draftsRestoring = false;
     }
   }
+  function restoreDrafts(editor) {
+    const drafts = readDrafts();
+    if (editor.id === 'influence-editor') showInfluenceSection(drafts.ui.influenceSection || 'interest');
+    draftForms.forEach((form) => {
+      const draft = drafts.forms[formKey(form)];
+      if (draft && editor.contains(form)) applyDraft(form, draft);
+    });
+  }
+  draftForms.forEach((form) => {
+    form.addEventListener('input', () => saveDraftSoon(form));
+    form.addEventListener('change', () => saveDraftSoon(form));
+    form.addEventListener('click', () => window.setTimeout(() => { if (!form.hidden) saveDraftSoon(form); }, 0));   // add / remove photo or block rows
+  });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flushDrafts(); });
+  window.addEventListener('pagehide', flushDrafts);
 
   supabaseState.client.auth.getSession().then(({ data, error }) => {
     if (error) {
@@ -846,8 +1070,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     loginPanel.hidden = Boolean(data.session);
     if (data.session) {
-      showWorkspace();
-      loadJournalEntries(); loadInfluenceLists(); loadCreations();
+      activeUserId = data.session.user.id;
+      showWorkspace();   // opening a panel loads its own list; no extra loads here (they overlapped and doubled rows)
     }
   });
 });
