@@ -1,6 +1,4 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  await window.rikitoMarkdownReady;
-  await window.rikitoMarkdown.ensure().catch(() => {});
   const feed = document.getElementById('journal-feed');
   const supabaseState = window.soulSupabase;
   if (!feed || !supabaseState?.client) {
@@ -10,7 +8,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const { data, error } = await supabaseState.client
     .from('journal_entries')
-    .select('slug,title,excerpt,cover_image,published_at,created_at')
+    .select('slug,title,published_at,created_at')
     .eq('status', 'published')
     .order('published_at', { ascending: false, nullsFirst: false })
     .order('created_at', { ascending: false });
@@ -30,38 +28,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function createEntry(entry) {
     const article = document.createElement('article');
-    article.className = 'post';
-
-    const content = document.createElement('div');
-    content.className = 'post-content';
+    article.className = 'journal-row';
 
     const date = document.createElement('span');
     date.className = 'post-date';
     date.textContent = formatDate(entry.published_at || entry.created_at);
 
-    const title = document.createElement('h3');
-    title.textContent = entry.title;
-
-    const excerpt = document.createElement('div');
-    excerpt.className = 'markdown-copy';
-    window.rikitoMarkdown.set(excerpt, entry.excerpt || 'A thought from the journal.', true);
-
     const link = document.createElement('a');
-    link.className = 'btn btn-outline';
+    link.className = 'journal-title-link';
     link.href = `journal-entry?slug=${encodeURIComponent(entry.slug)}`;
-    link.textContent = 'read the full thought →';
+    link.textContent = entry.title;
 
-    if (entry.cover_image) {
-      const image = document.createElement('img');
-      image.className = 'journal-card-cover';
-      image.src = entry.cover_image;
-      image.alt = '';
-      image.loading = 'lazy';
-      image.addEventListener('error', () => image.remove());
-      article.appendChild(image);
-    }
-    content.append(date, title, excerpt, link);
-    article.appendChild(content);
+    article.append(date, link);
     return article;
   }
 
