@@ -42,7 +42,7 @@ body{
   min-height:100vh;
   display:flex;
   flex-direction:column;
-  overflow-x:clip;
+  overflow-x:hidden;
   font-family: var(--font-body);
   background: var(--paper);
   color: var(--ink);
@@ -120,6 +120,33 @@ body::before{
 }
 .home-intro-title::before{ color:var(--rose); transform:translate(-4px,2px); }
 .home-intro-title::after{ color:var(--denim); transform:translate(4px,-2px); }
+.home-intro-log{
+  position:relative;
+  z-index:1;
+  margin:2px 0 0;
+  color:var(--rose);
+  font-family:'Courier New',monospace;
+  font-size:.62rem;
+  letter-spacing:.08em;
+  animation:intro-log-in .7s steps(2,end) .8s both;
+}
+.home-intro-sparks{ position:absolute; inset:0; pointer-events:none; }
+.home-intro-sparks b{
+  position:absolute;
+  left:50%;
+  top:50%;
+  color:var(--mustard);
+  font-family:var(--font-hand);
+  font-size:clamp(1.5rem,4vw,3rem);
+  opacity:0;
+  animation:intro-spark-in .9s cubic-bezier(.2,1.4,.4,1) 1.05s both;
+}
+.home-intro-sparks b:nth-child(1){ --x:-26vw; --y:-16vh; color:var(--rose); }
+.home-intro-sparks b:nth-child(2){ --x:28vw; --y:-12vh; animation-delay:1.12s; }
+.home-intro-sparks b:nth-child(3){ --x:-31vw; --y:13vh; color:var(--denim); animation-delay:1.18s; }
+.home-intro-sparks b:nth-child(4){ --x:30vw; --y:17vh; color:var(--rose); animation-delay:1.24s; }
+.home-intro-sparks b:nth-child(5){ --x:-19vw; --y:27vh; animation-delay:1.3s; }
+.home-intro-sparks b:nth-child(6){ --x:22vw; --y:28vh; color:var(--sage); animation-delay:1.36s; }
 .home-intro-status{
   display:flex; flex-wrap:wrap; justify-content:center; align-items:center;
   gap:.25rem .6rem; max-width:100%;
@@ -148,16 +175,21 @@ body::before{
 .home-intro.is-done .home-intro-status,
 .home-intro.is-done .home-intro-skip{ animation:intro-word-flicker .35s ease-in forwards; }
 .home-intro.is-done .home-intro-title{ animation:intro-title-exit .65s cubic-bezier(.7,0,.2,1) forwards; }
+.home-intro.is-done .home-intro-sparks b{ animation:intro-spark-out .55s ease-in forwards; }
+.home-intro.is-done .home-intro-log{ animation:intro-word-flicker .3s ease-in forwards; }
 @keyframes intro-ring{ to{ transform:rotate(360deg); } }
 @keyframes intro-spin{ to{ transform:rotate(360deg); } }
 @keyframes intro-text-in{ from{ opacity:0; transform:translateY(12px); } to{ opacity:1; transform:none; } }
 @keyframes intro-title-in{ from{ opacity:0; transform:scale(.75) rotate(-4deg); letter-spacing:.28em; } to{ opacity:1; transform:none; } }
+@keyframes intro-log-in{ from{ opacity:0; letter-spacing:.4em; } to{ opacity:.8; letter-spacing:.08em; } }
+@keyframes intro-spark-in{ from{ opacity:0; transform:translate(-50%,-50%) scale(.2) rotate(-45deg); } 55%{ opacity:1; } to{ opacity:.75; transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) scale(1) rotate(15deg); } }
 @keyframes home-intro-idle{ 0%,100%{ transform:rotate(0deg); } 50%{ transform:rotate(-.35deg); } }
 @keyframes home-intro-exit{ 0%{ opacity:1; transform:scale(1); } 45%{ opacity:1; transform:scale(1.03) rotate(1.5deg); } 100%{ opacity:0; visibility:hidden; transform:scale(1.18) rotate(-7deg); } }
 @keyframes intro-ring-pop{ to{ opacity:0; transform:scale(1.7) rotate(80deg); } }
 @keyframes intro-orbit-pop{ to{ opacity:0; transform:scale(2.4) rotate(150deg); } }
 @keyframes intro-title-exit{ 0%{ opacity:1; transform:scale(1); } 55%{ opacity:1; transform:scale(1.08) rotate(2deg); } 100%{ opacity:0; transform:scale(.35) rotate(-12deg) translateY(18px); } }
 @keyframes intro-word-flicker{ 0%{ opacity:1; } 35%{ opacity:.35; } 100%{ opacity:0; transform:translateY(-10px) rotate(2deg); } }
+@keyframes intro-spark-out{ to{ opacity:0; transform:translate(0,0) scale(2) rotate(90deg); } }
 
 .home-page .home-reveal{
   opacity:0;
@@ -833,6 +865,7 @@ p{ margin: 0 0 1em; max-width: 66ch; }
    --------------------------------------------------------- */
 .nav-toggle{ display:none; }
 @media (max-width:720px){
+  html{ overflow-x:hidden; }
   body{ font-size:16px; }
   .page,
   .page-wide{ width:100%; max-width:none; padding-left:16px; padding-right:16px; padding-bottom:64px; }
@@ -930,10 +963,8 @@ p{ margin: 0 0 1em; max-width: 66ch; }
    sections
    --------------------------------------------------------- */
 section.block{ margin: 64px 0; }
-.home-notes-grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; }
 section.block > h2{ margin-bottom: 6px; }
 .block-intro{ color: var(--ink-soft); margin-bottom: 30px; }
-@media (max-width:720px){ .home-notes-grid{ grid-template-columns:minmax(0,1fr); gap:16px; } }
 
 .divider{
   border:none;

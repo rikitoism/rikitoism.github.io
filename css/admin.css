@@ -362,8 +362,20 @@ body.admin-authenticated .admin-content > .admin-card{ width:100%; max-width:980
   .admin-sidebar-foot{ display:flex; margin:0; padding:0 0 0 6px; border:0; }
   .admin-sidebar-foot a{ display:none; }
   .admin-page .admin-signout{ width:auto; padding:6px 12px; border:1px solid rgba(255,255,255,.16); border-radius:99px; }
-  body.admin-authenticated .admin-content{ height:auto; padding:20px 14px 56px; }
-  body.admin-authenticated .admin-workspace{ grid-template-rows:auto minmax(0,1fr); }
+  body.admin-authenticated{ overflow-x:clip; overflow-y:visible; }
+  body.admin-authenticated > .admin-shell{ height:auto; min-height:100vh; min-height:100dvh; overflow:visible; }
+  body.admin-authenticated .admin-workspace{ position:relative; inset:auto; width:100%; height:auto; min-height:0; overflow:visible; grid-template-columns:minmax(0,1fr); grid-template-rows:auto auto; align-content:start; }
+  body.admin-authenticated .admin-sidebar{ position:sticky; top:0; z-index:5; min-width:0; align-self:start; }
+  body.admin-authenticated .admin-content{
+    width:100%;
+    height:auto;
+    min-width:0;
+    min-height:0;
+    overflow:visible;
+    scroll-behavior:auto;
+    padding:18px 14px calc(36px + env(safe-area-inset-bottom));
+  }
+  body.admin-authenticated .editor-actions{ position:static; backdrop-filter:none; }
 }
 @media (max-width:620px){
   .influence-tabs{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); overflow:visible; }
