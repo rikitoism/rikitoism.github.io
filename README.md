@@ -65,14 +65,17 @@ Browser ──► GitHub Pages (static HTML / CSS / JS)
 ├── css/
 │   ├── style.css                          the site's look
 │   ├── guestbook.css                      guestbook wall and form
-│   └── admin.css                          admin panel
+│   └── admin.css                          all admin-only styles
 ├── js/
 │   ├── site-layout.js                     shared header and footer
 │   ├── supabase-client.js                 creates the Supabase client
 │   ├── supabase-config.example.js         copy this to supabase-config.js
 │   ├── markdown-content.js                safe Markdown rendering
-│   ├── admin.js, guestbook-admin.js       admin panel logic
-│   └── home.js, journal.js, memories.js … one file per page
+│   ├── admin.js                           admin module entry point
+│   ├── admin/                             shared core + one module per editor
+│   │   ├── core.js, guestbook.js
+│   │   └── journal.js, memories.js, creations.js, influences.js …
+│   └── home.js, journal.js, memories.js … one file per public page
 ├── data/                                  text for the Home and Me pages
 ├── supabase/
 │   ├── schema.sql                         tables, security rules, storage
@@ -89,7 +92,8 @@ You'll need a free Supabase account and a recent version of Node (only for the l
 1. Create a project at [supabase.com](https://supabase.com).
 2. Open the **SQL editor** and run `supabase/schema.sql`.
 3. Run `supabase/migrations/guestbook-upgrade.sql` to add the guestbook.
-4. Optional: run the other files in `supabase/migrations/`.
+4. Run `supabase/migrations/journal-remove-excerpt-cover.sql` to remove the retired journal excerpt and cover-image columns from an existing project. This drops their stored values.
+5. Optional: run the other files in `supabase/migrations/`.
    - `memories-upgrade.sql` and `creations-upgrade.sql` are only for projects created from an older version of the schema.
    - `restore-core-interests.sql`, `seed-creations.sql` and `seed-me-timeline.sql` add starter content.
 

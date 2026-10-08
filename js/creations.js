@@ -47,8 +47,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const description = document.createElement('div');
     description.className = 'markdown-copy';
-    if (window.rikitoMarkdown?.set) window.rikitoMarkdown.set(description, item.short_description || '', true);
-    else description.textContent = item.short_description || '';
+    const documentBlock = (Array.isArray(item.body) ? item.body : []).find((block) => block.type === 'document');
+    let bodyExcerpt = '';
+    if (documentBlock?.content) {
+      const preview = document.createElement('div');
+      preview.innerHTML = window.rikitoMarkdown?.sanitizeHtml(documentBlock.content) || '';
+      bodyExcerpt = preview.textContent.trim().replace(/\s+/g, ' ').slice(0, 180);
+    }
+    const cardDescription = item.short_description || bodyExcerpt || `${Array.isArray(item.body) ? item.body.length : 0} project blocks`;
+    if (window.rikitoMarkdown?.set) window.rikitoMarkdown.set(description, cardDescription, true);
+    else description.textContent = cardDescription;
 
     const tags = document.createElement('ul');
     tags.className = 'tag-list';

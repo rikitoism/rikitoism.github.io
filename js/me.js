@@ -19,13 +19,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const timeline = document.querySelector('[data-me-timeline]');
   const renderTimeline = (timelineData) => {
+    const events = sortTimelineChronologically(timelineData.events || []);
     timeline.querySelector('.eyebrow-tag').textContent = timelineData.eyebrow;
     timeline.querySelector('h2').textContent = timelineData.title;
     window.rikitoMarkdown.set(timeline.querySelector('.block-intro'), timelineData.intro, true);
     const timelineList = timeline.querySelector('.timeline');
-    timelineList.dataset.start = timelineData.events[0]?.year || '';
-    timelineList.dataset.end = timelineData.events[timelineData.events.length - 1]?.year || '';
-    timelineList.replaceChildren(...timelineData.events.map((event, index) => {
+    timelineList.dataset.start = events[0]?.year || '';
+    timelineList.dataset.end = events[events.length - 1]?.year || '';
+    timelineList.replaceChildren(...events.map((event, index) => {
       const item = document.createElement('li');
       item.style.setProperty('--timeline-index', index);
       const dot = document.createElement('button');
@@ -50,17 +51,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         body.append(' ', link);
       }
       detail.append(year, title, body);
-      if (event.more) {
-        const more = document.createElement('details');
-        more.className = 't-expand';
-        const summary = document.createElement('summary');
-        summary.textContent = 'read more';
-        const moreBody = document.createElement('div');
-        moreBody.className = 't-more';
-        window.rikitoMarkdown.set(moreBody, event.more);
-        more.append(summary, moreBody);
-        detail.appendChild(more);
-      }
       item.append(dot, detail);
       return item;
     }));
@@ -164,3 +154,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   }, { threshold: 0.12 });
   revealTargets.forEach((target) => revealObserver.observe(target));
 });
+
+const TIMELINE_MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+function timelineMonthValue(value) {
+  const formatted = /^(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{4})$/i.exec(String(value || '').trim());
+  if (formatted) {
+    const month = TIMELINE_MONTHS.findIndex((name) => name.toLowerCase() === formatted[1].toLowerCase()) + 1;
+    return Number(formatted[2]) * 12 + month;
+  }
+  const legacyYear = /^(\d{4}|\d{3}x)$/i.exec(String(value || '').trim());
+  if (legacyYear) {
+    const year = legacyYear[1].toLowerCase().endsWith('x') ? Number(`${legacyYear[1].slice(0, 3)}0`) : Number(legacyYear[1]);
+    return year * 12 + 1;
+  }
+  return Number.POSITIVE_INFINITY;
+}
+
+function sortTimelineChronologically(events) {
+  return [...events].sort((a, b) => timelineMonthValue(a.year) - timelineMonthValue(b.year));
+}

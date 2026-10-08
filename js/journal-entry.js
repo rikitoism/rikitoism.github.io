@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const { data, error } = await supabaseState.client
     .from('journal_entries')
-    .select('title,excerpt,body,cover_image,published_at,created_at')
+    .select('title,body,published_at,created_at')
     .eq('slug', slug)
     .eq('status', 'published')
     .single();
@@ -32,27 +32,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const title = document.createElement('h1');
   title.textContent = data.title;
 
-  const excerpt = document.createElement('p');
-  excerpt.className = 'lede';
-  excerpt.textContent = data.excerpt;
-
   container.append(date, title);
-  if (data.cover_image) {
-    const image = document.createElement('img');
-    image.src = data.cover_image;
-    image.alt = '';
-    image.className = 'journal-entry-cover';
-    image.loading = 'eager';
-    image.addEventListener('error', () => {
-      image.replaceWith(Object.assign(document.createElement('p'), {
-        className: 'feed-error',
-        textContent: 'The cover image could not be loaded. Check that its URL is public and complete.'
-      }));
-    });
-    container.appendChild(image);
-  }
-  container.appendChild(excerpt);
-
   const body = document.createElement('div');
   body.className = 'journal-entry-body';
   if (typeof data.body?.markdown === 'string') {

@@ -10,9 +10,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  const [{ data: memories, error: memoryError }, { data: events, error: eventError }] = await Promise.all([
+  const [{ data: memories, error: memoryError }, { data: timelineEvents, error: eventError }] = await Promise.all([
     client.from('memories').select('id,slug,title,description,cover_image').eq('status', 'published').order('created_at', { ascending: false }),
-    client.from('memory_timeline').select('date_label,title,description,more_description').eq('status', 'published').order('sort_order', { ascending: true }).order('created_at', { ascending: true })
+    client.from('memory_timeline').select('date_label,title,description,more_description').eq('status', 'published')
   ]);
 
   if (memoryError) {
@@ -27,10 +27,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (eventError) {
     console.error('Memory timeline query failed:', eventError);
     showStatus(timeline, 'The timeline could not be loaded right now.');
-  } else if (!events.length) {
+  } else if (!timelineEvents.length) {
     showStatus(timeline, 'No timeline events published yet.');
   } else {
-    timeline.replaceChildren(...events.map((event) => {
+    timelineEvents.sort((a, b) => timelineDateValue(a.date_label) - timelineDateValue(b.date_label));
+    timeline.replaceChildren(...timelineEvents.map((event) => {
       const item = document.createElement('li');
       item.innerHTML = `<span class="t-year"></span><span class="t-title"></span><div class="t-body"></div>`;
       item.querySelector('.t-year').textContent = event.date_label;
@@ -60,6 +61,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       image.src = memory.cover_image;
       image.alt = memory.title;
       image.loading = 'lazy';
+      image.decoding = 'async';
+      image.fetchPriority = 'low';
       frame.appendChild(image);
     } else {
       frame.textContent = '♡';
@@ -77,5 +80,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     status.className = 'feed-status';
     status.textContent = message;
     element.appendChild(status);
+  }
+
+  function timelineDateValue(value) {
+    const match = /^(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{4})$/i.exec(String(value || '').trim());
+    if (!match) return Number.POSITIVE_INFINITY;
+    const month = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'].indexOf(match[1].toLowerCase()) + 1;
+    return Number(match[2]) * 12 + month;
   }
 });

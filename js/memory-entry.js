@@ -40,6 +40,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     cover.className = 'memory-entry-cover';
     cover.src = memory.cover_image;
     cover.alt = memory.title;
+    cover.decoding = 'async';
+    cover.fetchPriority = 'high';
     container.appendChild(cover);
   }
   const title = document.createElement('h1');

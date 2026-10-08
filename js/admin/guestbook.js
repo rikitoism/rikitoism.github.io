@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const notice = document.getElementById('guestbook-admin-notice');
   const viewTabs = [...document.querySelectorAll('[data-guestbook-view]')];
   const searchInput = document.getElementById('guestbook-admin-search');
+  const searchToggle = document.getElementById('guestbook-search-toggle');
   const typeFilter = document.getElementById('guestbook-admin-type');
   const typeLabels = {
     opinion: '💭 Opinion',
@@ -33,6 +34,16 @@ document.addEventListener('DOMContentLoaded', () => {
     viewTabs.forEach((item) => item.setAttribute('aria-pressed', String(item === tab)));
     loadEntries();
   }));
+  searchToggle?.addEventListener('click', () => {
+    const isOpen = !searchInput.hidden;
+    searchInput.hidden = isOpen;
+    searchToggle.setAttribute('aria-expanded', String(!isOpen));
+    searchToggle.setAttribute('aria-label', isOpen ? 'Show note search' : 'Hide note search');
+    if (isOpen) {
+      searchInput.value = '';
+      renderEntries();
+    } else searchInput.focus();
+  });
   searchInput.addEventListener('input', renderEntries);
   typeFilter.addEventListener('change', renderEntries);
   client?.auth.getSession().then(({ data }) => {
@@ -100,16 +111,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const meta = document.createElement('div');
     meta.className = 'guestbook-pending-meta';
     const identity = document.createElement('strong');
-    identity.textContent = entry.is_anonymous ? 'Anonymous' : entry.name || 'No name';
+    identity.textContent = entry.is_anonymous ? 'anonymous' : entry.name || 'nickname';
     const kind = document.createElement('span');
     kind.className = 'guestbook-kind-tag';
-    kind.textContent = typeLabels[entry.type] || typeLabels['something-else'];
-    if (entry.type === 'opinion' && entry.feeling) {
-      const feeling = document.createElement('span');
-      feeling.className = 'guestbook-kind-feeling';
-      feeling.textContent = entry.feeling;
-      kind.append(' ', feeling);
-    }
+    kind.textContent = entry.type || 'something else';
+    const emoji = entry.is_anonymous
+      ? '🌙'
+      : entry.feeling || ({ appreciation: '💛', opinion: '✨' }[entry.type] || '');
     const date = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(entry.created_at));
     const timestamp = document.createElement('time');
     timestamp.className = 'guestbook-pending-date';
@@ -120,17 +128,15 @@ document.addEventListener('DOMContentLoaded', () => {
     state.textContent = activeView === 'pending' ? 'Waiting' : activeView === 'approved' ? 'On the wall' : 'Hidden';
     const identityGroup = document.createElement('div');
     identityGroup.className = 'guestbook-pending-identity';
-    identityGroup.append(identity, timestamp);
-    meta.append(kind, identityGroup, state);
+    identityGroup.append(identity, document.createTextNode(' · '), kind);
+    meta.append(emoji ? `${emoji} ` : '', identityGroup, timestamp, state);
 
     const message = document.createElement('blockquote');
     message.textContent = entry.message;
 
-    const replyEditor = document.createElement('details');
+    const replyEditor = document.createElement('div');
     replyEditor.className = 'guestbook-reply-editor';
-    replyEditor.open = false;
-    const replySummary = document.createElement('summary');
-    replySummary.textContent = 'Reply';
+    replyEditor.hidden = true;
     const replyInput = document.createElement('textarea');
     replyInput.rows = 3;
     replyInput.maxLength = 1200;
@@ -141,30 +147,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const replyCount = document.createElement('span');
     replyCount.className = 'guestbook-reply-count';
     replyCount.textContent = '0 / 1,200';
-    const replyPreview = document.createElement('div');
-    replyPreview.className = 'guestbook-reply-preview';
-    replyPreview.hidden = true;
-    const previewLabel = document.createElement('span');
-    previewLabel.textContent = 'Wall preview';
-    const previewText = document.createElement('div');
-    previewText.className = 'guestbook-reply-preview-content';
-    if (entry.reply) {
-      window.rikitoMarkdown.set(previewText, entry.reply);
-      replyPreview.hidden = false;
-      replyCount.textContent = `${entry.reply.length.toLocaleString()} / 1,200`;
-    }
-    replyPreview.append(previewLabel, previewText);
+    if (entry.reply) replyCount.textContent = `${entry.reply.length.toLocaleString()} / 1,200`;
     replyInput.addEventListener('input', () => {
       const reply = replyInput.value.trim();
       replyCount.textContent = `${replyInput.value.length.toLocaleString()} / 1,200`;
-      window.rikitoMarkdown.set(previewText, reply);
-      replyPreview.hidden = !reply;
       if (saveReplyButton && activeView !== 'pending') saveReplyButton.disabled = reply === (entry.reply || '');
     });
     const replyField = document.createElement('label');
     replyField.className = 'guestbook-pending-reply';
     replyField.append(replyInput, replyCount);
-    replyEditor.append(replySummary, replyField, replyPreview);
+    replyEditor.append(replyField);
+    if (entry.reply) {
+      const publicReply = document.createElement('div');
+      publicReply.className = 'guestbook-card-reply';
+      window.rikitoMarkdown.set(publicReply, entry.reply);
+      card.appendChild(publicReply);
+    }
 
     const actions = document.createElement('div');
     actions.className = 'guestbook-pending-actions';
@@ -172,36 +170,60 @@ document.addEventListener('DOMContentLoaded', () => {
       const approveButton = document.createElement('button');
       approveButton.type = 'button';
       approveButton.className = 'btn guestbook-publish-button';
-      approveButton.textContent = 'Publish to wall';
+      approveButton.textContent = 'Publish';
       approveButton.addEventListener('click', () => approveEntry(entry.id, replyInput.value, card, actions));
       actions.appendChild(approveButton);
       addStatusAction(actions, 'Hide', 'hidden', entry, card);
-      const rejectButton = createDeleteButton(entry, card, actions, 'Reject & delete');
+      addReplyAction(actions, replyEditor, replyInput);
+      const rejectButton = createDeleteButton(entry, card, actions);
       actions.appendChild(rejectButton);
     } else if (activeView === 'approved') {
+      addStatusAction(actions, 'Hide', 'hidden', entry, card);
+      addReplyAction(actions, replyEditor, replyInput);
       saveReplyButton = document.createElement('button');
       saveReplyButton.type = 'button';
-      saveReplyButton.className = 'btn guestbook-publish-button';
+      saveReplyButton.className = 'btn guestbook-publish-button guestbook-save-reply';
       saveReplyButton.textContent = 'Save reply';
       saveReplyButton.disabled = true;
-      actions.appendChild(saveReplyButton);
+      replyEditor.appendChild(saveReplyButton);
       saveReplyButton.addEventListener('click', () => updatePublishedReply(entry.id, replyInput.value, card, actions));
-      addStatusAction(actions, 'Hide', 'hidden', entry, card);
-      actions.appendChild(createDeleteButton(entry, card, actions, 'Delete note'));
+      actions.appendChild(createDeleteButton(entry, card, actions));
     } else {
-      addStatusAction(actions, 'Return to wall', 'approved', entry, card);
-      actions.appendChild(createDeleteButton(entry, card, actions, 'Delete note'));
+      const publishButton = document.createElement('button');
+      publishButton.type = 'button';
+      publishButton.className = 'btn guestbook-publish-button';
+      publishButton.textContent = 'Publish';
+      publishButton.addEventListener('click', () => updateStatus(entry, 'approved', card, actions));
+      actions.append(publishButton);
+      addReplyAction(actions, replyEditor, replyInput);
+      actions.appendChild(createDeleteButton(entry, card, actions));
     }
 
-    card.append(meta, message, replyEditor, actions);
+    card.prepend(meta, message);
+    card.append(replyEditor, actions);
     return card;
   }
 
-  function createDeleteButton(entry, card, actions, label) {
+  function addReplyAction(actions, editor, input) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'btn btn-outline guestbook-reply-button';
+    button.textContent = 'Reply';
+    button.setAttribute('aria-expanded', 'false');
+    button.addEventListener('click', () => {
+      const open = editor.hidden;
+      editor.hidden = !open;
+      button.setAttribute('aria-expanded', String(open));
+      if (open) input.focus();
+    });
+    actions.appendChild(button);
+  }
+
+  function createDeleteButton(entry, card, actions) {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'btn btn-outline guestbook-delete-button';
-    button.textContent = label;
+    button.textContent = 'Delete';
     button.addEventListener('click', () => rejectEntry(entry.id, card, actions));
     return button;
   }
@@ -217,9 +239,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function updateStatus(entry, status, card, actions) {
     setActionsDisabled(actions, true);
-    const button = actions.querySelector('.guestbook-hide-button');
+    const button = actions.querySelector('.guestbook-hide-button, .guestbook-publish-button');
     const previousText = button.textContent;
-    button.textContent = status === 'hidden' ? 'Hiding...' : 'Returning...';
+    button.textContent = status === 'hidden' ? 'Hiding...' : 'Publishing...';
     const patch = { status };
     if (status === 'approved') patch.approved_at = new Date().toISOString();
     const { error } = await client.from('guestbook_entries').update(patch).eq('id', entry.id);
@@ -249,7 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (error) {
       console.error('Guestbook approval failed:', error);
       setActionsDisabled(actions, false);
-      actions.querySelector('.guestbook-publish-button').textContent = 'Publish to wall';
+      actions.querySelector('.guestbook-publish-button').textContent = 'Publish';
       showCardError(card, 'Could not approve this note. Please try again.');
       return;
     }
@@ -263,7 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function updatePublishedReply(id, reply, card, actions) {
     setActionsDisabled(actions, true);
-    const saveButton = actions.querySelector('.guestbook-publish-button');
+    const saveButton = card.querySelector('.guestbook-save-reply');
     saveButton.textContent = 'Saving...';
     const value = reply.trim() || null;
     const { error } = await client.from('guestbook_entries').update({ reply: value }).eq('id', id).eq('status', activeView);
@@ -294,7 +316,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (error) {
       console.error('Guestbook rejection failed:', error);
       setActionsDisabled(actions, false);
-      actions.querySelector('.guestbook-delete-button').textContent = activeView === 'pending' ? 'Reject & delete' : 'Delete note';
+      actions.querySelector('.guestbook-delete-button').textContent = 'Delete';
       showCardError(card, 'Could not delete this note. Please try again.');
       return;
     }

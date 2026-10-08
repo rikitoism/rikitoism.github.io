@@ -42,10 +42,16 @@
     return window.DOMPurify.sanitize(window.marked.parseInline(value));
   }
 
+  function sanitizeHtml(source) {
+    const value = String(source ?? '');
+    if (!window.DOMPurify?.sanitize) return escapeHtml(value);
+    return window.DOMPurify.sanitize(value, { USE_PROFILES: { html: true }, ADD_ATTR: ['class', 'data-language', 'data-tex'] });
+  }
+
   function set(target, source, inline = false) {
     if (!target) return;
     target.innerHTML = inline ? renderInline(source) : render(source);
   }
 
-  window.rikitoMarkdown = { ensure, render, renderInline, set };
+  window.rikitoMarkdown = { ensure, render, renderInline, sanitizeHtml, set };
 })();

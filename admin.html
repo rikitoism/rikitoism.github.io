@@ -35,13 +35,13 @@
         <button class="admin-module" type="button" data-open-editor="guestbook-editor"><span class="admin-module-glyph" aria-hidden="true">♡</span><span class="admin-module-name">Guestbook</span><span id="guestbook-rail-badge" class="admin-rail-badge" hidden>0</span></button>
         <button class="admin-module" type="button" data-open-editor="journal-editor"><span class="admin-module-glyph" aria-hidden="true">¶</span><span class="admin-module-name">Journal</span></button>
         <button class="admin-module" type="button" data-open-editor="memory-editor"><span class="admin-module-glyph" aria-hidden="true">◷</span><span class="admin-module-name">Memories</span></button>
-        <button class="admin-module" type="button" data-open-editor="timeline-editor"><span class="admin-module-glyph" aria-hidden="true">↗</span><span class="admin-module-name">Timeline</span></button>
+        <button class="admin-module" type="button" data-open-editor="timeline-editor"><span class="admin-module-glyph" aria-hidden="true">↗</span><span class="admin-module-name">Timelines</span></button>
         <button class="admin-module" type="button" data-open-editor="influence-editor"><span class="admin-module-glyph" aria-hidden="true">◎</span><span class="admin-module-name">Influences</span></button>
         <button class="admin-module" type="button" data-open-editor="creation-editor"><span class="admin-module-glyph" aria-hidden="true">✎</span><span class="admin-module-name">Creations</span></button>
-        <button class="admin-module" type="button" data-open-editor="me-timeline-editor"><span class="admin-module-glyph" aria-hidden="true">↗</span><span class="admin-module-name">Me timeline</span></button>
       </nav>
       <div class="admin-sidebar-foot">
         <a href="guestbook" target="_blank" rel="noopener">Preview guestbook <span aria-hidden="true">↗</span></a>
+        <button id="admin-theme-toggle" class="admin-theme-toggle" type="button" aria-pressed="false">Switch theme</button>
         <button id="logout-button" class="admin-signout" type="button">Sign out</button>
       </div>
     </aside>
@@ -60,55 +60,74 @@
       </section>
 
       <section id="admin-home" class="admin-card admin-home" hidden>
-        <p class="admin-kicker">Backstage</p>
-        <h2>Your writing room.</h2>
-        <p class="admin-home-copy">Pick a section on the left, or jump straight in below.</p>
-        <div class="admin-home-actions">
-          <button class="btn" type="button" data-open-editor="journal-editor">Write a journal entry <span aria-hidden="true">→</span></button>
-          <button class="btn btn-outline" type="button" data-open-editor="guestbook-editor">Review guestbook notes <span aria-hidden="true">→</span></button>
+        <div class="admin-overview-hero">
+          <div class="admin-overview-copy">
+            <p class="admin-kicker">Your private studio</p>
+            <h2>Your writing room.</h2>
+            <p class="admin-home-copy">Choose a collection to work on, or jump straight into a new journal entry.</p>
+            <div class="admin-home-actions">
+              <button class="btn" type="button" data-open-editor="journal-editor">Write a journal entry <span aria-hidden="true">→</span></button>
+              <button class="btn btn-outline" type="button" data-open-editor="guestbook-editor">Review guestbook notes <span aria-hidden="true">→</span></button>
+            </div>
+          </div>
+          <div class="admin-orbit" aria-label="Quick editor navigation">
+            <div class="admin-orbit-ring">
+              <button type="button" data-open-editor="guestbook-editor" style="--orbit-angle:-90deg;--orbit-counter-angle:90deg" aria-label="Open Guestbook" title="Guestbook"><span aria-hidden="true">♡</span></button>
+              <button type="button" data-open-editor="journal-editor" style="--orbit-angle:-30deg;--orbit-counter-angle:30deg" aria-label="Open Journal" title="Journal"><span aria-hidden="true">¶</span></button>
+              <button type="button" data-open-editor="memory-editor" style="--orbit-angle:30deg;--orbit-counter-angle:-30deg" aria-label="Open Memories" title="Memories"><span aria-hidden="true">◷</span></button>
+              <button type="button" data-open-editor="timeline-editor" style="--orbit-angle:90deg;--orbit-counter-angle:-90deg" aria-label="Open Timelines" title="Timelines"><span aria-hidden="true">↗</span></button>
+              <button type="button" data-open-editor="influence-editor" style="--orbit-angle:150deg;--orbit-counter-angle:-150deg" aria-label="Open Influences" title="Influences"><span aria-hidden="true">◎</span></button>
+              <button type="button" data-open-editor="creation-editor" style="--orbit-angle:210deg;--orbit-counter-angle:-210deg" aria-label="Open Creations" title="Creations"><span aria-hidden="true">✎</span></button>
+            </div>
+            <div class="admin-orbit-core"><span>RIKITOISM</span></div>
+          </div>
         </div>
         <div class="admin-home-grid">
           <button class="admin-tile" type="button" data-open-editor="journal-editor"><strong>Journal</strong><span>Write, edit and publish entries</span></button>
           <button class="admin-tile" type="button" data-open-editor="guestbook-editor"><strong>Guestbook</strong><span>Approve, reply to or hide notes</span></button>
           <button class="admin-tile" type="button" data-open-editor="memory-editor"><strong>Memories</strong><span>Albums and their photos</span></button>
-          <button class="admin-tile" type="button" data-open-editor="timeline-editor"><strong>Timeline</strong><span>Events on the memories page</span></button>
+          <button class="admin-tile" type="button" data-open-editor="timeline-editor"><strong>Timelines</strong><span>My life and memories</span></button>
           <button class="admin-tile" type="button" data-open-editor="influence-editor"><strong>Influences</strong><span>Interests, playlists, songs and more</span></button>
           <button class="admin-tile" type="button" data-open-editor="creation-editor"><strong>Creations</strong><span>Projects, writing and experiments</span></button>
-          <button class="admin-tile" type="button" data-open-editor="me-timeline-editor"><strong>Me timeline</strong><span>Milestones on the me page</span></button>
         </div>
       </section>
 
-  <section id="me-timeline-editor" class="admin-card editor-panel" hidden>
-    <div class="admin-toolbar"><div><p class="eyebrow-tag">fifth editor</p><h2>me timeline</h2></div><button id="new-me-timeline-event" class="btn btn-outline" type="button">new event</button></div>
-    <p class="admin-help">These events are stored in Supabase and override the starter timeline in <code>data/me.json</code>.</p>
-    <form id="me-timeline-form" class="admin-form editor-form" hidden>
-      <input type="hidden" name="id">
-      <label>Year or label<input name="year" required placeholder="202X"></label>
-      <label>Title<input name="title" required></label>
-      <label>Description<textarea name="body" data-markdown rows="3"></textarea></label>
-      <label>Optional read-more description<textarea name="more" data-markdown rows="4"></textarea></label>
-      <label>Optional link<input type="url" name="bodyLink" placeholder="https://... or journal"></label>
-      <label>Order<input name="sort_order" type="number" value="0"></label>
-      <div class="editor-actions"><button class="btn" type="submit">save event →</button><button class="btn btn-outline" type="button" data-cancel-form="me-timeline-form">back to events</button><span id="me-timeline-message" class="admin-message" role="status"></span></div>
-    </form>
-    <div class="editor-list-wrap"><h3>saved Me timeline events</h3><div id="me-timeline-list-admin" class="editor-list"></div></div>
-  </section>
-
   <section id="creation-editor" class="admin-card editor-panel" hidden>
     <div class="admin-toolbar"><div><p class="eyebrow-tag">fourth editor</p><h2>creations</h2></div><button id="new-creation" class="btn btn-outline" type="button">new creation</button></div>
-    <form id="creation-form" class="admin-form editor-form" hidden>
-      <input type="hidden" name="id">
-      <label>Title<input name="title" required></label><label>Slug<input name="slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*"></label>
-      <label>Category<select name="category"><option value="physics-research">physics &amp; research</option><option value="writing">writing</option><option value="animation">animation</option><option value="code">code</option><option value="abandoned">abandoned</option></select></label>
-      <label>Status label<input name="status_label" placeholder="in progress, experiment, RIP"></label><label>Short description<textarea name="short_description" data-markdown></textarea></label>
-      <label>Tags <span class="field-note">comma separated</span><input name="tags"></label><label>Cover image URL<input type="url" name="cover_image"></label><label>Or upload cover<input type="file" name="cover_file" accept="image/*"></label>
-      <label>Project URL<input type="url" name="project_url"></label><label>GitHub URL <span class="field-note">optional</span><input type="url" name="github_url"></label>
-      <label>Date<input type="date" name="creation_date"></label>
-      <label>Visibility<select name="status"><option value="draft">draft</option><option value="published">published</option></select></label><label><input type="checkbox" name="featured"> Featured creation</label>
-      <div><h3>Project body</h3><div id="creation-blocks" class="creation-block-editor"></div><button id="add-creation-block" class="btn btn-outline" type="button">add block</button></div>
-      <div class="editor-actions"><button class="btn" type="submit">save creation →</button><button class="btn btn-outline" type="button" data-cancel-form="creation-form">back to creations</button><span id="creation-form-message" class="admin-message"></span></div>
-    </form>
-    <div class="editor-list-wrap">
+    <div id="creation-studio" class="creation-studio" hidden>
+      <div class="creation-studio-top">
+        <button id="creation-back" class="btn btn-outline" type="button">← Creations</button>
+        <strong id="creation-studio-name" class="creation-studio-name">Untitled creation</strong>
+        <span id="creation-studio-status" class="creation-studio-status" role="status" data-state="saved"><i></i><span>New draft</span></span>
+        <button id="creation-details-toggle" class="btn btn-outline" type="button" aria-expanded="false">Details</button>
+        <button id="creation-save" class="btn" type="button">Save</button>
+      </div>
+      <div id="creation-toolbar" class="creation-toolbar" role="toolbar" aria-label="Project formatting">
+        <button type="button" data-command="undo" aria-label="Undo" title="Undo (Ctrl+Z)">↶</button><button type="button" data-command="redo" aria-label="Redo" title="Redo (Ctrl+Shift+Z)">↷</button><span class="creation-toolbar-separator"></span>
+        <button type="button" data-command="bold" aria-label="Bold" title="Bold"><strong>B</strong></button><button type="button" data-command="italic" aria-label="Italic" title="Italic"><em>I</em></button><button type="button" data-command="underline" aria-label="Underline" title="Underline"><u>U</u></button><button type="button" data-command="mark" aria-label="Highlight" title="Highlight">▰</button><span class="creation-toolbar-separator"></span>
+        <button type="button" data-command="p">Text</button><button type="button" data-command="h1">H1</button><button type="button" data-command="h2">H2</button><button type="button" data-command="h3">H3</button><span class="creation-toolbar-separator"></span>
+        <button type="button" data-command="ul">• List</button><button type="button" data-command="ol">1. List</button><button type="button" data-command="quote">Quote</button><span class="creation-toolbar-separator"></span>
+        <button type="button" data-command="link">Link</button><button type="button" data-command="image">Image</button><button type="button" data-command="code">Code</button><button type="button" data-command="equation">Equation</button><button type="button" data-command="table">Table</button><button type="button" data-command="divider">Divider</button>
+      </div>
+      <div class="creation-studio-scroll" role="region" aria-label="Creation document"><div class="creation-studio-page"><input id="creation-title" class="creation-studio-title" placeholder="Untitled creation" aria-label="Creation title" autocomplete="off"><div id="creation-document" class="creation-document" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Project document" spellcheck="true"></div></div></div>
+      <div id="creation-slash-menu" class="creation-slash-menu" role="listbox" hidden></div>
+      <aside id="creation-details" class="creation-details" hidden>
+        <div class="creation-details-head"><h2>Project details</h2><button id="creation-details-close" class="btn btn-outline" type="button">Close</button></div>
+        <form id="creation-form" class="admin-form creation-details-form">
+          <input type="hidden" name="id">
+          <label>Slug<input name="slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*"></label>
+          <div class="creation-details-row"><label>Category<select name="category"><option value="physics-research">physics &amp; research</option><option value="writing">writing</option><option value="animation">animation</option><option value="code">code</option><option value="abandoned">abandoned</option></select></label><label>Visibility<select name="status"><option value="draft">draft</option><option value="published">published</option></select></label></div>
+          <label>Status label<input name="status_label" placeholder="in progress, experiment, RIP"></label><label>Short description<textarea name="short_description" rows="3"></textarea></label>
+          <label>Tags <span class="field-note">comma separated</span><input name="tags"></label><label>Cover image URL<input type="url" name="cover_image"></label>
+          <label>Project URL<input type="url" name="project_url"></label><label>GitHub URL <span class="field-note">optional</span><input type="url" name="github_url"></label>
+          <div class="creation-details-row"><label>Publication date<input type="date" name="creation_date"></label><label class="creation-featured"><input type="checkbox" name="featured"> Featured</label></div>
+          <details class="creation-json-details"><summary>Saved document data</summary><pre id="creation-json-preview"></pre></details>
+        </form>
+        <p id="creation-form-message" class="admin-message" role="status"></p>
+      </aside>
+      <dialog id="creation-insert-dialog" class="creation-insert-dialog"><form method="dialog" id="creation-insert-form"><h2 id="creation-dialog-title">Insert</h2><label>URL<input id="creation-insert-url" type="url" placeholder="https://..."></label><label id="creation-upload-label">Or upload an image<input id="creation-insert-file" type="file" accept="image/*"></label><label id="creation-alt-label">Caption / alt text<input id="creation-insert-alt"></label><div class="creation-dialog-actions"><button class="btn btn-outline" type="button" id="creation-dialog-cancel">Cancel</button><button class="btn" type="submit">Insert</button></div></form></dialog>
+    </div>
+      <div id="creation-list-view" class="editor-list-wrap">
       <div class="guestbook-view-toolbar creation-filter-bar">
         <div class="guestbook-view-tabs" role="group" aria-label="Creation status">
           <button type="button" data-creation-view="all" aria-pressed="true">All</button>
@@ -183,8 +202,7 @@
     <form id="journal-form" class="admin-form editor-form" hidden>
       <input type="hidden" name="id">
       <label>Title<input name="title" required></label>
-      <label>Slug<input name="slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="a-quiet-thought"></label>
-      <label>Excerpt<textarea name="excerpt" data-markdown rows="3"></textarea></label>
+      <label>Slug<input name="slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="auto-filled-from-title"></label>
       <div class="markdown-field">
         <div class="markdown-field-heading"><div><h3>Journal body</h3><p class="field-note">Write in Markdown. Preview updates as you type.</p></div><span class="markdown-mode">MARKDOWN</span></div>
         <div class="markdown-workspace">
@@ -192,7 +210,6 @@
           <section class="markdown-preview-panel" aria-label="Journal body preview"><div class="markdown-preview-heading">PREVIEW</div><div id="journal-body-preview" class="markdown-preview-body"><p class="admin-help">Your formatted entry appears here.</p></div></section>
         </div>
       </div>
-      <label>Cover image URL<input type="url" name="cover_image" placeholder="https://..."></label>
       <label>Status<select name="status"><option value="draft">draft</option><option value="published">published</option></select></label>
       <div class="editor-actions"><button class="btn" type="submit">save entry →</button><button class="btn btn-outline" type="button" data-cancel-form="journal-form">back to journal</button><span id="journal-form-message" class="admin-message" role="status"></span></div>
     </form>
@@ -210,31 +227,70 @@
     <form id="memory-form" class="admin-form editor-form" hidden>
       <input type="hidden" name="id">
       <label>Title<input name="title" required></label>
-      <label>Slug<input name="slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="the-night-sky"></label>
-      <label>Description <span class="field-note">maximum 100 words · Markdown</span><textarea name="description" data-markdown rows="3"></textarea></label>
+      <label>Slug<input name="slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="auto-filled-from-title"></label>
+      <label>Description <span class="field-note">maximum 100 words · Markdown</span><textarea name="description" rows="3"></textarea></label>
       <label>Main image URL<input type="url" name="cover_image" placeholder="https://..."></label>
-      <label>Or upload main image<input type="file" name="cover_file" accept="image/*"></label>
-      <label>Status<select name="status"><option value="draft">draft</option><option value="published">published</option></select></label>
+      <div class="memory-upload-field" data-memory-file-picker>
+        <input class="memory-file-input" id="memory-cover-file" type="file" name="cover_file" accept="image/*">
+        <label class="memory-upload-trigger" for="memory-cover-file"><span class="memory-upload-icon" aria-hidden="true">↑</span><span class="memory-upload-copy"><strong>Choose main image</strong><small>JPEG, PNG, WebP</small></span></label>
+        <p class="memory-file-name" data-memory-file-name aria-live="polite">No file selected</p>
+        <p class="memory-image-note">Uploads are resized and optimized for faster loading while retaining detail.</p>
+      </div>
       <div>
         <h3>Photos inside this memory</h3>
         <div id="memory-photo-fields" class="admin-form"></div>
         <button id="add-memory-photo" class="btn btn-outline" type="button">add photo</button>
       </div>
+      <label>Status<select name="status"><option value="draft">draft</option><option value="published">published</option></select></label>
       <div class="editor-actions"><button class="btn" type="submit">save memory →</button><button class="btn btn-outline" type="button" data-cancel-form="memory-form">back to memories</button><span id="memory-form-message" class="admin-message" role="status"></span></div>
     </form>
     <div class="editor-list-wrap"><h3>saved memories</h3><div id="memory-list-admin" class="editor-list"></div></div>
-    <hr class="divider">
-    <div class="admin-toolbar"><div><p class="eyebrow-tag">memory timeline</p><h2>events</h2></div><button id="new-timeline-event" class="btn btn-outline" type="button">new event</button></div>
-    <form id="timeline-form" class="admin-form editor-form" hidden>
-      <input type="hidden" name="id">
-      <label>Date or label<input name="date_label" required placeholder="summer 2026"></label>
-      <label>Title<input name="title" required></label>
-      <label>Initial description <span class="field-note">maximum 40 words · Markdown</span><textarea name="description" data-markdown rows="3"></textarea></label>
-      <label>Optional read-more description<textarea name="more_description" data-markdown rows="4"></textarea></label>
-      <label>Status<select name="status"><option value="published">published</option><option value="draft">draft</option></select></label>
-      <div class="editor-actions"><button class="btn" type="submit">save event →</button><button class="btn btn-outline" type="button" data-cancel-form="timeline-form">back to events</button><span id="timeline-form-message" class="admin-message" role="status"></span></div>
-    </form>
-    <div class="editor-list-wrap"><h3>saved timeline events</h3><div id="timeline-list-admin" class="editor-list"></div></div>
+  </section>
+
+  <section id="timeline-editor" class="admin-card editor-panel" hidden>
+    <div class="guestbook-view-tabs influence-tabs timeline-tabs" role="group" aria-label="Timeline sections">
+      <button id="timeline-tab-life" type="button" data-timeline-tab="life" aria-pressed="true" aria-controls="life-timeline-section">My life in a nutshell <span class="tab-count" data-timeline-count="life">0</span></button>
+      <button id="timeline-tab-memories" type="button" data-timeline-tab="memories" aria-pressed="false" aria-controls="memory-timeline-section">Timeline of memories <span class="tab-count" data-timeline-count="memories">0</span></button>
+    </div>
+    <section id="life-timeline-section" class="timeline-subsection" data-timeline-section="life" role="region" aria-labelledby="my-life-timeline-heading">
+      <div class="admin-toolbar"><div><p class="eyebrow-tag">personal milestones</p><h2 id="my-life-timeline-heading">my life in a nutshell</h2></div><button id="new-me-timeline-event" class="btn btn-outline" type="button">new event</button></div>
+      <p class="admin-help">These events are stored in Supabase and override the starter timeline in <code>data/me.json</code>.</p>
+      <form id="me-timeline-form" class="admin-form editor-form" hidden>
+        <input type="hidden" name="id">
+        <div class="month-year-control">
+          <div class="month-year-heading">Month and year <span class="field-note">Saved as Month Year, for example September 2014</span></div>
+          <div class="month-year-selects">
+            <label><span class="sr-only">Month</span><select name="month" required aria-label="Month"><option value="">Choose month</option><option value="1">January</option><option value="2">February</option><option value="3">March</option><option value="4">April</option><option value="5">May</option><option value="6">June</option><option value="7">July</option><option value="8">August</option><option value="9">September</option><option value="10">October</option><option value="11">November</option><option value="12">December</option></select></label>
+            <label><span class="sr-only">Year</span><select name="calendar_year" required aria-label="Year"></select></label>
+          </div>
+        </div>
+        <label>Title<input name="title" required></label>
+        <label>Description<textarea name="body" data-markdown rows="3"></textarea></label>
+        <label>Optional link<input type="url" name="bodyLink" placeholder="https://... or journal"></label>
+        <div class="editor-actions"><button class="btn" type="submit">save event →</button><button class="btn btn-outline" type="button" data-cancel-form="me-timeline-form">back to events</button><span id="me-timeline-message" class="admin-message" role="status"></span></div>
+      </form>
+      <div class="editor-list-wrap"><h3>saved milestones</h3><div id="me-timeline-list-admin" class="editor-list"></div></div>
+    </section>
+
+    <section id="memory-timeline-section" class="timeline-subsection" data-timeline-section="memories" role="region" aria-labelledby="memory-timeline-heading" hidden>
+      <div class="admin-toolbar"><div><p class="eyebrow-tag">memory archive</p><h2 id="memory-timeline-heading">timeline of memories</h2></div><button id="new-timeline-event" class="btn btn-outline" type="button">new event</button></div>
+      <form id="timeline-form" class="admin-form editor-form" hidden>
+        <input type="hidden" name="id">
+        <div class="month-year-control">
+          <div class="month-year-heading">Month and year <span class="field-note">Saved as Month Year, for example September 2014</span></div>
+          <div class="month-year-selects">
+            <label><span class="sr-only">Month</span><select name="month" required aria-label="Month"><option value="">Choose month</option><option value="1">January</option><option value="2">February</option><option value="3">March</option><option value="4">April</option><option value="5">May</option><option value="6">June</option><option value="7">July</option><option value="8">August</option><option value="9">September</option><option value="10">October</option><option value="11">November</option><option value="12">December</option></select></label>
+            <label><span class="sr-only">Year</span><select name="calendar_year" required aria-label="Year"></select></label>
+          </div>
+        </div>
+        <label>Title<input name="title" required></label>
+        <label>Initial description <span class="field-note">maximum 40 words · Markdown</span><textarea name="description" data-markdown rows="3"></textarea></label>
+        <label>Optional read-more description<textarea name="more_description" data-markdown rows="4"></textarea></label>
+        <label>Status<select name="status"><option value="published">published</option><option value="draft">draft</option></select></label>
+        <div class="editor-actions"><button class="btn" type="submit">save event →</button><button class="btn btn-outline" type="button" data-cancel-form="timeline-form">back to events</button><span id="timeline-form-message" class="admin-message" role="status"></span></div>
+      </form>
+      <div class="editor-list-wrap"><h3>saved memory events</h3><div id="timeline-list-admin" class="editor-list"></div></div>
+    </section>
   </section>
 
   <section id="guestbook-editor" class="admin-card editor-panel" hidden>
@@ -245,10 +301,11 @@
         <button type="button" data-guestbook-view="hidden" aria-pressed="false">Hidden</button>
       </div>
       <div class="guestbook-view-filters">
+        <button id="guestbook-search-toggle" class="guestbook-search-toggle" type="button" aria-expanded="false" aria-controls="guestbook-admin-search" aria-label="Show note search">⌕</button>
         <label class="sr-only" for="guestbook-admin-search">Search guestbook notes</label>
-        <input id="guestbook-admin-search" type="search" placeholder="Search notes">
+        <input id="guestbook-admin-search" type="search" placeholder="Search notes" hidden>
         <label class="sr-only" for="guestbook-admin-type">Filter by type</label>
-        <select id="guestbook-admin-type"><option value="all">All types</option><option value="opinion">Opinions</option><option value="appreciation">Appreciation</option><option value="confession">Confessions</option><option value="criticism">Criticism</option></select>
+        <select id="guestbook-admin-type"><option value="all">all</option><option value="opinion">opinion</option><option value="appreciation">appreciation</option><option value="confession">confession</option><option value="criticism">criticism</option></select>
       </div>
     </div>
     <p id="guestbook-admin-notice" class="guestbook-admin-notice" role="status" aria-live="polite" hidden></p>
@@ -263,14 +320,7 @@
 <script src="js/markdown-content.js"></script>
 <script src="js/supabase-config.js"></script>
 <script src="js/supabase-client.js"></script>
-<script src="js/admin.js"></script>
-<script src="js/guestbook-admin.js"></script>
-<script>
-// phone: keep the active section pill in view in the scrolling top bar
-new MutationObserver((records) => {
-  const active = records.map((r) => r.target).find((el) => el.getAttribute('aria-current') === 'page');
-  if (active && window.matchMedia('(max-width: 820px)').matches) active.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
-}).observe(document.getElementById('dashboard'), { attributes: true, attributeFilter: ['aria-current'], subtree: true });
-</script>
+<script src="js/admin/guestbook.js"></script>
+<script type="module" src="js/admin.js"></script>
 </body>
 </html>

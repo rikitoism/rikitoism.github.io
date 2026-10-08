@@ -25,6 +25,80 @@ document.addEventListener('DOMContentLoaded', async () => {
     const empty = document.createElement('p'); empty.className = 'feed-note'; empty.textContent = 'This creation has no project notes yet.'; body.append(empty);
   }
   root.append(body);
+  renderEquations(body);
   function link(url, text, className) { const a = document.createElement('a'); a.className = className; a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.textContent = text; return a; }
-  function renderBlock(block) { const type = block.type || 'text'; const element = document.createElement(type === 'heading' ? 'h2' : type === 'code' ? 'pre' : type === 'image' ? 'img' : 'div'); element.className = `creation-block creation-block-${type}`; if (type === 'image') { element.src = block.url; element.alt = block.alt || ''; } else if (type === 'gallery') { const urls = [block.url, ...(block.content || '').split(/\n/)].filter(Boolean); urls.forEach((url) => { const image = document.createElement('img'); image.src = url.trim(); image.alt = ''; element.append(image); }); } else if (type === 'code') element.textContent = block.content || ''; else if (type === 'embed') { const label = document.createElement('strong'); label.textContent = block.content || 'external resource'; const frame = document.createElement('a'); frame.href = block.url || '#'; frame.target = '_blank'; frame.rel = 'noopener noreferrer'; frame.textContent = block.url ? 'open resource →' : 'resource link missing'; element.append(label, frame); } else window.rikitoMarkdown.set(element, block.content || '', type === 'heading'); return element; }
+  function renderBlock(block) {
+    const type = block.type || 'text';
+    if (type === 'document') {
+      const article = document.createElement('div'); article.className = 'creation-rich-document';
+      article.innerHTML = window.rikitoMarkdown.sanitizeHtml(block.content || ''); return article;
+    }
+    const element = document.createElement(type === 'heading' ? `h${Math.min(3, Math.max(1, Number(block.level) || 2))}` : type === 'code' ? 'pre' : type === 'image' ? 'img' : 'div');
+    element.className = `creation-block creation-block-${type}`;
+    if (type === 'image') { element.src = block.url; element.alt = block.alt || ''; }
+    else if (type === 'gallery') { const urls = [block.url, ...(block.content || '').split(/\n/)].filter(Boolean); urls.forEach((url) => { const image = document.createElement('img'); image.src = url.trim(); image.alt = ''; image.loading = 'lazy'; element.append(image); }); }
+    else if (type === 'code') element.textContent = block.content || '';
+    else if (type === 'equation') { element.classList.add('creation-equation'); element.dataset.tex = block.content || ''; element.textContent = block.content || ''; }
+    else if (type === 'table') {
+      const rows = Array.isArray(block.rows) ? block.rows : [];
+      const table = document.createElement('table'); rows.forEach((row, rowIndex) => { const tr = table.insertRow(); row.forEach((value) => { const cell = document.createElement(rowIndex ? 'td' : 'th'); cell.textContent = value; tr.append(cell); }); }); element.append(table);
+    }
+    else if (type === 'divider') element.innerHTML = '<hr>';
+    else if (type === 'table' && Array.isArray(block.rows)) {
+      const table = document.createElement('table'); block.rows.forEach((row, rowIndex) => { const tr = table.insertRow(); row.forEach((value) => { const cell = document.createElement(rowIndex ? 'td' : 'th'); cell.textContent = value; tr.append(cell); }); }); element.append(table);
+    }
+    else if (type === 'embed') { const label = document.createElement('strong'); label.textContent = block.content || 'external resource'; const anchor = document.createElement('a'); anchor.href = block.url || '#'; anchor.target = '_blank'; anchor.rel = 'noopener noreferrer'; anchor.textContent = block.url ? 'open resource →' : 'resource link missing'; element.append(label, anchor); }
+    else window.rikitoMarkdown.set(element, block.content || '', type === 'heading');
+    return element;
+  }
+
+  async function renderEquations(container) {
+    const equations = [...container.querySelectorAll('.creation-rich-equation, .creation-equation')];
+    container.querySelectorAll('img').forEach((image) => { image.loading = 'lazy'; image.decoding = 'async'; });
+    const codeBlocks = [...container.querySelectorAll('.creation-rich-code code')];
+    if (equations.length) {
+      try {
+        await ensureMathJax();
+        equations.forEach((equation) => {
+          const tex = equation.dataset.tex || equation.textContent.trim();
+          try { equation.replaceChildren(window.MathJax.tex2svg(tex, { display: true })); }
+          catch { equation.textContent = tex; }
+        });
+      } catch { /* Keep the saved LaTeX visible if the renderer is unavailable. */ }
+    }
+    if (codeBlocks.length) {
+      try {
+        await ensureHighlight();
+        codeBlocks.forEach((code) => {
+          const pre = code.closest('pre'); const language = pre.dataset.language || 'plaintext';
+          if (window.hljs.getLanguage(language)) code.innerHTML = window.hljs.highlight(code.textContent, { language, ignoreIllegals: true }).value;
+        });
+      } catch { /* Plain, readable code remains if highlighting is unavailable. */ }
+    }
+  }
+
+  function ensureMathJax() {
+    if (window.MathJax?.tex2svg) return Promise.resolve();
+    if (window.creationMathJaxLoading) return window.creationMathJaxLoading;
+    window.MathJax = { startup: { typeset: false }, svg: { fontCache: 'none' } };
+    window.creationMathJaxLoading = new Promise((resolve, reject) => {
+      const script = document.createElement('script'); script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js';
+      script.onload = () => Promise.resolve(window.MathJax?.startup?.promise).then(() => {
+        if (typeof window.MathJax?.tex2svg !== 'function') throw new Error('MathJax did not initialize.');
+        resolve();
+      }).catch(reject);
+      script.onerror = reject; document.head.append(script);
+    });
+    return window.creationMathJaxLoading;
+  }
+
+  function ensureHighlight() {
+    if (window.hljs) return Promise.resolve();
+    if (window.creationHighlightLoading) return window.creationHighlightLoading;
+    window.creationHighlightLoading = new Promise((resolve, reject) => {
+      const script = document.createElement('script'); script.src = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js';
+      script.onload = resolve; script.onerror = reject; document.head.append(script);
+    });
+    return window.creationHighlightLoading;
+  }
 });
