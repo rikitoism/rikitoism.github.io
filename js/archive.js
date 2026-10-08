@@ -2,7 +2,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const list = document.getElementById('archive-list');
   const search = document.getElementById('archive-search');
   const client = window.soulSupabase?.client;
-  if (!list || !client) {
+  if (!list) return;
+  if (!client) {
     showStatus('Archive is not connected to Supabase yet.');
     return;
   }
@@ -21,7 +22,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     ...journals.map((item) => archiveEntry(item.title, 'journal', `journal-entry?slug=${encodeURIComponent(item.slug)}`, item.published_at || item.created_at)),
     ...memories.map((item) => archiveEntry(item.title, 'memory', `memory-entry?slug=${encodeURIComponent(item.slug)}`, item.created_at)),
     ...shapedItems.map((item) => archiveEntry(item.title, item.medium || 'influence', '#', null, item)),
-    ...creations.map((item) => archiveEntry(item.title, item.category.replace('-', ' · '), `creation-entry?slug=${encodeURIComponent(item.slug)}`, item.published_at || item.created_at))
+    ...creations.map((item) => archiveEntry(item.title, (item.category || 'creation').replace('-', ' · '), `creation-entry?slug=${encodeURIComponent(item.slug)}`, item.published_at || item.created_at))
   ].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
   if (!entries.length) {
@@ -52,19 +53,26 @@ document.addEventListener('DOMContentLoaded', async () => {
   function openShaped(item) {
     const dialog = document.getElementById('archive-shaped-dialog');
     const content = document.getElementById('archive-shaped-content');
+    if (!dialog || !content || dialog.open) return;
     content.replaceChildren();
     if (item.image_url) {
       const image = document.createElement('img'); image.src = item.image_url; image.alt = item.title; content.appendChild(image);
     }
     const title = document.createElement('h2'); title.textContent = item.title;
-    const medium = document.createElement('p'); medium.className = 'eyebrow-tag'; medium.textContent = item.medium;
-    const summary = document.createElement('p'); summary.textContent = item.short_description;
-    const reflection = document.createElement('p'); reflection.textContent = item.reflection;
-    content.append(title, medium, summary, reflection);
+    const details = document.createElement('p'); details.className = 'eyebrow-tag'; details.textContent = item.medium || 'influence';
+    content.append(title, details);
+    if (item.short_description) {
+      const summary = document.createElement('p'); summary.textContent = item.short_description; content.appendChild(summary);
+    }
+    if (item.reflection) {
+      const reflection = document.createElement('p'); reflection.textContent = item.reflection; content.appendChild(reflection);
+    }
     if (item.link_url) {
       const link = document.createElement('a'); link.className = 'influence-more-link'; link.href = item.link_url; link.target = '_blank'; link.rel = 'noopener noreferrer'; link.textContent = 'open link →'; content.appendChild(link);
     }
     dialog.showModal();
   }
-  document.querySelector('#archive-shaped-dialog .dialog-close')?.addEventListener('click', () => document.getElementById('archive-shaped-dialog').close());
+  document.querySelector('#archive-shaped-dialog .dialog-close')?.addEventListener('click', () => {
+    document.getElementById('archive-shaped-dialog')?.close();
+  });
 });

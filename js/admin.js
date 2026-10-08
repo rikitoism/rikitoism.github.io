@@ -1,4 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
+  const requiredElements = [
+    'connection-message', 'login-panel', 'login-form', 'login-message', 'dashboard', 'admin-home',
+    'logout-button', 'journal-editor', 'journal-form', 'journal-entry-list', 'journal-form-message',
+    'memory-editor', 'memory-form', 'memory-list-admin', 'memory-photo-fields', 'timeline-form',
+    'timeline-list-admin', 'me-timeline-editor', 'me-timeline-form', 'me-timeline-list-admin',
+    'new-timeline-event', 'admin-home'
+  ];
+  const missingElements = requiredElements.filter((id) => !document.getElementById(id));
+  if (missingElements.length) {
+    console.error(`Admin could not initialize. Missing elements: ${missingElements.join(', ')}`);
+    return;
+  }
+
   const status = document.getElementById('connection-message');
   const loginPanel = document.getElementById('login-panel');
   const loginForm = document.getElementById('login-form');
@@ -150,7 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
   ].forEach(([form, list]) => configureEditorForm(form, list));
 
   document.addEventListener('click', (event) => {
-    const cancel = event.target.closest('[data-cancel-form]');
+    const cancel = event.target instanceof Element ? event.target.closest('[data-cancel-form]') : null;
     if (!cancel) return;
     const form = document.getElementById(cancel.dataset.cancelForm);
     if (form) showEditorList(form);

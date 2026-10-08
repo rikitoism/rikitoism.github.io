@@ -57,26 +57,16 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ---------- creation tabs (creations.html) ---------- */
   const tabButtons = document.querySelectorAll('.tab-btn');
   if (tabButtons.length) {
-    tabButtons.forEach(btn => {
+    tabButtons.forEach((btn) => {
       btn.addEventListener('click', () => {
         const target = btn.getAttribute('data-tab');
+        const panel = target ? document.getElementById(target) : null;
+        if (!panel || !panel.classList.contains('tab-panel')) return;
+
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('is-active'));
         document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('is-active'));
         btn.classList.add('is-active');
-        document.getElementById(target).classList.add('is-active');
-      });
-    });
-  }
-
-  /* ---------- live filter for archive.html ---------- */
-  const searchBox = document.getElementById('archive-search');
-  const archiveItems = document.querySelectorAll('.archive-list li');
-  if (searchBox && archiveItems.length) {
-    searchBox.addEventListener('input', () => {
-      const q = searchBox.value.trim().toLowerCase();
-      archiveItems.forEach(li => {
-        const text = li.textContent.toLowerCase();
-        li.style.display = text.includes(q) ? '' : 'none';
+        panel.classList.add('is-active');
       });
     });
   }
