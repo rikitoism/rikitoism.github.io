@@ -25,7 +25,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const empty = document.createElement('p'); empty.className = 'feed-note'; empty.textContent = 'This creation has no project notes yet.'; body.append(empty);
   }
   root.append(body);
-  renderEquations(body);
+  const savedCodeLanguages = blocks.find((block) => block.type === 'document')?.codeLanguages || [];
+  renderEquations(body, savedCodeLanguages);
   function link(url, text, className) { const a = document.createElement('a'); a.className = className; a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.textContent = text; return a; }
   function renderBlock(block) {
     const type = block.type || 'text';
@@ -52,10 +53,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     return element;
   }
 
-  async function renderEquations(container) {
+  async function renderEquations(container, savedCodeLanguages = []) {
     const equations = [...container.querySelectorAll('.creation-rich-equation, .creation-equation')];
     container.querySelectorAll('img').forEach((image) => { image.loading = 'lazy'; image.decoding = 'async'; });
     const codeBlocks = [...container.querySelectorAll('.creation-rich-code code')];
+    codeBlocks.forEach((code, index) => {
+      const pre = code.closest('pre');
+      const language = savedCodeLanguages[index] || pre.dataset.language || 'python';
+      pre.dataset.language = language;
+      const frame = document.createElement('div'); frame.className = 'creation-code-frame';
+      const toolbar = document.createElement('div'); toolbar.className = 'creation-code-toolbar';
+      const name = document.createElement('span'); name.className = 'creation-code-language'; name.textContent = languageName(language);
+      const copy = document.createElement('button'); copy.className = 'creation-code-copy'; copy.type = 'button'; copy.textContent = 'Copy';
+      copy.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(code.textContent);
+          copy.textContent = 'Copied';
+          setTimeout(() => { if (copy.isConnected) copy.textContent = 'Copy'; }, 1400);
+        } catch {
+          copy.textContent = 'Copy failed';
+          setTimeout(() => { if (copy.isConnected) copy.textContent = 'Copy'; }, 1800);
+        }
+      });
+      toolbar.append(name, copy);
+      pre.before(frame); frame.append(toolbar, pre);
+    });
     if (equations.length) {
       try {
         await ensureMathJax();
@@ -70,11 +92,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       try {
         await ensureHighlight();
         codeBlocks.forEach((code) => {
-          const pre = code.closest('pre'); const language = pre.dataset.language || 'plaintext';
+          const pre = code.closest('pre'); const language = pre.dataset.language;
           if (window.hljs.getLanguage(language)) code.innerHTML = window.hljs.highlight(code.textContent, { language, ignoreIllegals: true }).value;
         });
       } catch { /* Plain, readable code remains if highlighting is unavailable. */ }
     }
+  }
+
+  function languageName(language) {
+    return ({ javascript: 'JavaScript', typescript: 'TypeScript', plaintext: 'Plain text', cpp: 'C++' })[language] || language.charAt(0).toUpperCase() + language.slice(1);
   }
 
   function ensureMathJax() {

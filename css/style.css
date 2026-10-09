@@ -1704,6 +1704,11 @@ details.t-expand .t-more{
 .creation-rich-document figcaption{ margin-top:8px; color:var(--muted); font-size:.86rem; font-style:italic; }
 .creation-rich-document pre{ overflow:auto; margin:1.2em 0; padding:18px; border:1px solid var(--line); border-radius:13px; background:var(--ink); color:var(--paper); font:.88rem/1.65 ui-monospace,Consolas,monospace; tab-size:2; }
 .creation-rich-document > .creation-rich-code{ display:block; width:min(100%,780px); max-width:100%; margin:1.2em auto; box-sizing:border-box; }
+.creation-code-frame{ width:min(100%,780px); max-width:100%; margin:1.2em auto; overflow:hidden; border:1px solid var(--line); border-radius:13px; background:var(--ink); color:var(--paper); }
+.creation-code-toolbar{ display:flex; min-height:40px; align-items:center; justify-content:space-between; gap:12px; padding:6px 12px; border-bottom:1px solid color-mix(in srgb,var(--paper) 18%,transparent); color:var(--paper); font:600 .76rem/1.3 var(--font-ui); }
+.creation-code-copy{ min-height:28px; padding:4px 10px; border:1px solid color-mix(in srgb,var(--paper) 28%,transparent); border-radius:7px; background:transparent; color:inherit; font:inherit; cursor:pointer; }
+.creation-code-copy:hover{ border-color:var(--paper); background:color-mix(in srgb,var(--paper) 10%,transparent); }
+.creation-code-frame .creation-rich-code{ display:block; width:100%; max-width:none; margin:0; border:0; border-radius:0; }
 .creation-rich-document > .creation-rich-figure{ width:min(100%,780px); max-width:100%; margin:1.2em auto; text-align:center; }
 .creation-rich-figure img{ display:block; max-width:100%; max-height:620px; margin-inline:auto; object-fit:contain; }
 .creation-rich-document .hljs-keyword,.creation-rich-document .hljs-built_in,.creation-rich-document .hljs-selector-tag,.creation-rich-document .hljs-tag{ color:#73b8ff; }.creation-rich-document .hljs-string,.creation-rich-document .hljs-regexp{ color:#66c99b; }.creation-rich-document .hljs-number,.creation-rich-document .hljs-literal{ color:#f2bd68; }.creation-rich-document .hljs-comment,.creation-rich-document .hljs-quote{ color:#aaa6bc; font-style:italic; }.creation-rich-document .hljs-title,.creation-rich-document .hljs-function{ color:#ef89ae; }

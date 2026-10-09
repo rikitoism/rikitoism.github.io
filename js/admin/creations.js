@@ -17,7 +17,8 @@ export function initCreationsEditor(ui) {
   const slug = form.elements.slug;
   const filter = { view: 'all', query: '', category: 'all', sort: 'updated' };
   const categoryLabels = {};
-  const languages = ['javascript', 'typescript', 'python', 'html', 'css', 'json', 'bash', 'c', 'cpp', 'java', 'rust', 'go', 'sql', 'plaintext'];
+  const languages = ['python', 'javascript', 'typescript', 'html', 'css', 'json', 'bash', 'c', 'cpp', 'java', 'rust', 'go', 'sql', 'plaintext'];
+  const languageNames = { python: 'Python', javascript: 'JavaScript', typescript: 'TypeScript', html: 'HTML', css: 'CSS', json: 'JSON', bash: 'Bash', cpp: 'C++', plaintext: 'Plain text' };
   let entries = [];
   let current = null;
   let autoSlug = true;
@@ -60,7 +61,6 @@ export function initCreationsEditor(ui) {
   });
   slug.addEventListener('input', () => { autoSlug = !slug.value || slug.value === slugify(title.value); });
   doc.addEventListener('input', onDocumentInput);
-  doc.addEventListener('change', (event) => { if (event.target.closest('.creation-widget')) touch(); });
   doc.addEventListener('click', onDocumentClick);
   doc.addEventListener('keydown', onDocumentKeydown);
   doc.addEventListener('paste', onPaste);
@@ -249,10 +249,13 @@ export function initCreationsEditor(ui) {
 
   function serializeBody() {
     const clone = doc.cloneNode(true);
+    const codeLanguages = [];
     clone.querySelectorAll('.creation-widget').forEach((widget) => {
       const type = widget.dataset.type;
       if (type === 'code') {
-        const pre = document.createElement('pre'); pre.className = 'creation-rich-code'; pre.dataset.language = widget.querySelector('select').value;
+        const language = widget.dataset.language || widget.querySelector('select').value;
+        codeLanguages.push(language);
+        const pre = document.createElement('pre'); pre.className = 'creation-rich-code'; pre.dataset.language = language;
         const code = document.createElement('code'); code.textContent = widget.querySelector('textarea').value; pre.append(code); widget.replaceWith(pre);
       } else if (type === 'equation') {
         const equation = document.createElement('div'); equation.className = 'creation-rich-equation'; equation.dataset.tex = widget.querySelector('textarea').value.trim(); equation.textContent = equation.dataset.tex; widget.replaceWith(equation);
@@ -272,15 +275,17 @@ export function initCreationsEditor(ui) {
     });
     clone.querySelectorAll('[contenteditable], [data-editor-only]').forEach((element) => { element.removeAttribute('contenteditable'); element.removeAttribute('data-editor-only'); });
     const sanitized = window.rikitoMarkdown?.sanitizeHtml ? window.rikitoMarkdown.sanitizeHtml(clone.innerHTML) : clone.innerHTML;
-    return [{ type: 'document', content: sanitized }];
+    return [{ type: 'document', content: sanitized, codeLanguages }];
   }
 
   function normalizeBody(value) { return Array.isArray(value) ? value : Array.isArray(value?.blocks) ? value.blocks : []; }
   function hydrateBody(body) {
     if (body.length === 1 && body[0]?.type === 'document') {
       doc.innerHTML = window.rikitoMarkdown?.sanitizeHtml ? window.rikitoMarkdown.sanitizeHtml(body[0].content || '') : body[0].content || '';
+      let codeIndex = 0;
       doc.querySelectorAll('.creation-rich-code').forEach((pre) => {
-        const widget = createWidget('code', { language: pre.dataset.language, content: pre.textContent }); pre.replaceWith(widget);
+        const storedLanguage = body[0].codeLanguages?.[codeIndex++] || pre.dataset.language;
+        const widget = createWidget('code', { language: storedLanguage, content: pre.textContent }); pre.replaceWith(widget);
       });
       doc.querySelectorAll('.creation-rich-equation').forEach((equation) => {
         const widget = createWidget('equation', { content: equation.dataset.tex || equation.textContent }); equation.replaceWith(widget);
@@ -316,8 +321,13 @@ export function initCreationsEditor(ui) {
     head.append(label);
     if (type === 'code') {
       const language = document.createElement('select'); language.setAttribute('aria-label', 'Code language');
-      languages.forEach((value) => language.add(new Option(value === 'plaintext' ? 'Plain text' : value.toUpperCase(), value)));
-      language.value = languages.includes(values.lang || values.language) ? values.lang || values.language : 'javascript'; head.append(language);
+      languages.forEach((value) => language.add(new Option(languageNames[value] || value.toUpperCase(), value)));
+      const selectedLanguage = values.lang || values.language;
+      language.value = languages.includes(selectedLanguage) ? selectedLanguage : 'python';
+      widget.dataset.language = language.value;
+      label.textContent = language.selectedOptions[0]?.textContent || 'PYTHON';
+      head.append(language);
+      head.append(widgetButton('Copy', 'copy-code', 'Copy code'));
     }
     if (type === 'table') {
       head.append(widgetButton('+ Row', 'row'), widgetButton('+ Column', 'column'));
@@ -343,7 +353,16 @@ export function initCreationsEditor(ui) {
       rows.forEach((row, r) => { const tr = table.insertRow(); row.forEach((value) => { const cell = document.createElement(r === 0 ? 'th' : 'td'); cell.contentEditable = 'true'; cell.textContent = value; tr.append(cell); }); }); content.append(table);
     }
     widget.append(head, content);
-    if (type === 'code') { widget.querySelector('select').addEventListener('change', touch); drawCode(widget); }
+    if (type === 'code') {
+      const language = widget.querySelector('select');
+      language.addEventListener('change', () => {
+        widget.dataset.language = language.value;
+        label.textContent = language.selectedOptions[0]?.textContent || 'PYTHON';
+        drawCode(widget);
+        touch();
+      });
+      drawCode(widget);
+    }
     if (type === 'equation') drawEquation(widget);
     return widget;
   }
@@ -426,10 +445,23 @@ export function initCreationsEditor(ui) {
   function onDocumentClick(event) {
     const button = event.target.closest('[data-widget-action]'); if (!button) return;
     const widget = button.closest('.creation-widget'); const action = button.dataset.widgetAction;
+    if (action === 'copy-code') { copyCode(widget, button); return; }
     if (action === 'delete') { widget.remove(); ensureParagraph(); }
     if (action === 'row') { const table = widget.querySelector('table'); const last = table.rows[table.rows.length - 1]; const row = table.insertRow(); Array.from(last.cells).forEach(() => row.insertCell().contentEditable = 'true'); }
     if (action === 'column') Array.from(widget.querySelectorAll('tr')).forEach((row, index) => { const cell = document.createElement(index ? 'td' : 'th'); cell.contentEditable = 'true'; row.append(cell); });
     touch();
+  }
+
+  async function copyCode(widget, button) {
+    const text = widget?.querySelector('textarea')?.value || '';
+    try {
+      await navigator.clipboard.writeText(text);
+      button.textContent = 'Copied';
+      setTimeout(() => { if (button.isConnected) button.textContent = 'Copy'; }, 1400);
+    } catch {
+      button.textContent = 'Copy failed';
+      setTimeout(() => { if (button.isConnected) button.textContent = 'Copy'; }, 1800);
+    }
   }
 
   function onDocumentKeydown(event) {
