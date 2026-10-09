@@ -11,12 +11,35 @@
 <link rel="stylesheet" href="css/admin.css">
 </head>
 <body class="admin-page">
+<div class="admin-mobile-scrim" data-mobile-nav-close hidden></div>
+<header class="admin-mobile-nav" aria-label="Admin navigation">
+  <div class="admin-mobile-island">
+    <div class="admin-mobile-bar">
+      <button class="admin-mobile-current" type="button" aria-expanded="false" aria-controls="admin-mobile-panel">
+        <span class="admin-mobile-current-glyph" aria-hidden="true">⌂</span><span class="admin-mobile-current-name"><span class="admin-mobile-label-text">Overview</span></span><span class="admin-mobile-menu-icon" aria-hidden="true"><i></i><i></i></span>
+      </button>
+      <button class="admin-mobile-theme" type="button" aria-label="Switch theme" title="Switch theme"><span class="admin-mobile-theme-icon" aria-hidden="true">☾</span></button>
+    </div>
+    <div class="admin-mobile-panel" id="admin-mobile-panel" inert>
+      <div class="admin-mobile-pin"><nav class="admin-mobile-grid" aria-label="Admin editors">
+        <button class="admin-mobile-module" type="button" data-mobile-editor="admin-home"><span aria-hidden="true">※</span>Overview</button>
+        <button class="admin-mobile-module" type="button" data-mobile-editor="guestbook-editor"><span aria-hidden="true">☎</span>Guestbook</button>
+        <button class="admin-mobile-module" type="button" data-mobile-editor="journal-editor"><span aria-hidden="true">✪</span>Journal</button>
+        <button class="admin-mobile-module" type="button" data-mobile-editor="memory-editor"><span aria-hidden="true">〠</span>Memories</button>
+        <button class="admin-mobile-module" type="button" data-mobile-editor="timeline-editor"><span aria-hidden="true">⧗</span>Timelines</button>
+        <button class="admin-mobile-module" type="button" data-mobile-editor="influence-editor"><span aria-hidden="true">♞</span>Influences</button>
+        <button class="admin-mobile-module" type="button" data-mobile-editor="creation-editor"><span aria-hidden="true">✎</span>Creations</button>
+        <span class="admin-mobile-indicator" aria-hidden="true"></span>
+      </nav>
+      <button class="admin-mobile-signout" type="button">⇥ <span>Sign out</span></button></div>
+    </div>
+  </div>
+</header>
 <main class="admin-shell">
   <header class="admin-header">
     <div>
-      <p class="eyebrow-tag">private workspace</p>
-      <h1>content admin</h1>
-      <p class="lede">One calm place to add and edit the things that make up Rikitoism.</p>
+      <p class="eyebrow-tag">workspace</p>
+      <h1>admin</h1>
     </div>
     <a class="btn btn-outline" href="./">back to site</a>
   </header>
@@ -31,16 +54,16 @@
     <aside id="dashboard" class="admin-sidebar" hidden>
       <div class="admin-brand"><span class="admin-brand-mark" aria-hidden="true"></span><div class="admin-brand-name"><strong>Rikitoism</strong><span>backstage</span></div></div>
       <nav class="admin-module-grid" aria-label="Admin editors">
-        <button class="admin-module" type="button" data-open-editor="admin-home"><span class="admin-module-glyph" aria-hidden="true">⌂</span><span class="admin-module-name">Overview</span></button>
-        <button class="admin-module" type="button" data-open-editor="guestbook-editor"><span class="admin-module-glyph" aria-hidden="true">♡</span><span class="admin-module-name">Guestbook</span><span id="guestbook-rail-badge" class="admin-rail-badge" hidden>0</span></button>
-        <button class="admin-module" type="button" data-open-editor="journal-editor"><span class="admin-module-glyph" aria-hidden="true">¶</span><span class="admin-module-name">Journal</span></button>
-        <button class="admin-module" type="button" data-open-editor="memory-editor"><span class="admin-module-glyph" aria-hidden="true">◷</span><span class="admin-module-name">Memories</span></button>
-        <button class="admin-module" type="button" data-open-editor="timeline-editor"><span class="admin-module-glyph" aria-hidden="true">↗</span><span class="admin-module-name">Timelines</span></button>
-        <button class="admin-module" type="button" data-open-editor="influence-editor"><span class="admin-module-glyph" aria-hidden="true">◎</span><span class="admin-module-name">Influences</span></button>
+        <button class="admin-module" type="button" data-open-editor="admin-home"><span class="admin-module-glyph" aria-hidden="true">※</span><span class="admin-module-name">Overview</span></button>
+        <button class="admin-module" type="button" data-open-editor="guestbook-editor"><span class="admin-module-glyph" aria-hidden="true">☎</span><span class="admin-module-name">Guestbook</span><span id="guestbook-rail-badge" class="admin-rail-badge" hidden>0</span></button>
+        <button class="admin-module" type="button" data-open-editor="journal-editor"><span class="admin-module-glyph" aria-hidden="true">✪</span><span class="admin-module-name">Journal</span></button>
+        <button class="admin-module" type="button" data-open-editor="memory-editor"><span class="admin-module-glyph" aria-hidden="true">〠</span><span class="admin-module-name">Memories</span></button>
+        <button class="admin-module" type="button" data-open-editor="timeline-editor"><span class="admin-module-glyph" aria-hidden="true">⧗</span><span class="admin-module-name">Timelines</span></button>
+        <button class="admin-module" type="button" data-open-editor="influence-editor"><span class="admin-module-glyph" aria-hidden="true">♞</span><span class="admin-module-name">Influences</span></button>
         <button class="admin-module" type="button" data-open-editor="creation-editor"><span class="admin-module-glyph" aria-hidden="true">✎</span><span class="admin-module-name">Creations</span></button>
       </nav>
       <div class="admin-sidebar-foot">
-        <a href="guestbook" target="_blank" rel="noopener">Preview guestbook <span aria-hidden="true">↗</span></a>
+        <a href="guestbook" target="_blank" rel="noopener">Preview guestbook <span aria-hidden="true">➤</span></a>
         <button id="admin-theme-toggle" class="admin-theme-toggle" type="button" aria-pressed="false">Switch theme</button>
         <button id="logout-button" class="admin-signout" type="button">Sign out</button>
       </div>
@@ -48,12 +71,12 @@
 
     <div class="admin-content">
       <section id="login-panel" class="admin-card" hidden>
-        <p class="admin-kicker">Private workspace</p>
-        <h2>Sign in to backstage</h2>
-        <p class="admin-help">Your publishing tools are only available to your admin account.</p>
+        <p class="admin-kicker">rikitoism</p>
+        <h1>Backstage ☯</h1>
+        <p></p>
         <form id="login-form" class="admin-form">
-          <label>Email<input type="email" name="email" autocomplete="username" required></label>
-          <label>Password<input type="password" name="password" autocomplete="current-password" required></label>
+          <label>Email 🔎<input type="email" name="email" autocomplete="username" required></label>
+          <label>Password 🎐<input type="password" name="password" autocomplete="current-password" required></label>
           <button class="btn" type="submit">Sign in</button>
           <p id="login-message" class="admin-message" role="status"></p>
         </form>
@@ -62,7 +85,7 @@
       <section id="admin-home" class="admin-card admin-home" hidden>
         <div class="admin-overview-hero">
           <div class="admin-overview-copy">
-            <p class="admin-kicker">Your private studio</p>
+            <p class="admin-kicker">welcome to backstage</p>
             <h2>Your writing room.</h2>
             <p class="admin-home-copy">Choose a collection to work on, or jump straight into a new journal entry.</p>
             <div class="admin-home-actions">
@@ -72,11 +95,11 @@
           </div>
           <div class="admin-orbit" aria-label="Quick editor navigation">
             <div class="admin-orbit-ring">
-              <button type="button" data-open-editor="guestbook-editor" style="--orbit-angle:-90deg;--orbit-counter-angle:90deg" aria-label="Open Guestbook" title="Guestbook"><span aria-hidden="true">♡</span></button>
-              <button type="button" data-open-editor="journal-editor" style="--orbit-angle:-30deg;--orbit-counter-angle:30deg" aria-label="Open Journal" title="Journal"><span aria-hidden="true">¶</span></button>
-              <button type="button" data-open-editor="memory-editor" style="--orbit-angle:30deg;--orbit-counter-angle:-30deg" aria-label="Open Memories" title="Memories"><span aria-hidden="true">◷</span></button>
-              <button type="button" data-open-editor="timeline-editor" style="--orbit-angle:90deg;--orbit-counter-angle:-90deg" aria-label="Open Timelines" title="Timelines"><span aria-hidden="true">↗</span></button>
-              <button type="button" data-open-editor="influence-editor" style="--orbit-angle:150deg;--orbit-counter-angle:-150deg" aria-label="Open Influences" title="Influences"><span aria-hidden="true">◎</span></button>
+              <button type="button" data-open-editor="guestbook-editor" style="--orbit-angle:-90deg;--orbit-counter-angle:90deg" aria-label="Open Guestbook" title="Guestbook"><span aria-hidden="true">☎</span></button>
+              <button type="button" data-open-editor="journal-editor" style="--orbit-angle:-30deg;--orbit-counter-angle:30deg" aria-label="Open Journal" title="Journal"><span aria-hidden="true">✪</span></button>
+              <button type="button" data-open-editor="memory-editor" style="--orbit-angle:30deg;--orbit-counter-angle:-30deg" aria-label="Open Memories" title="Memories"><span aria-hidden="true">〠</span></button>
+              <button type="button" data-open-editor="timeline-editor" style="--orbit-angle:90deg;--orbit-counter-angle:-90deg" aria-label="Open Timelines" title="Timelines"><span aria-hidden="true">⧗</span></button>
+              <button type="button" data-open-editor="influence-editor" style="--orbit-angle:150deg;--orbit-counter-angle:-150deg" aria-label="Open Influences" title="Influences"><span aria-hidden="true">♞</span></button>
               <button type="button" data-open-editor="creation-editor" style="--orbit-angle:210deg;--orbit-counter-angle:-210deg" aria-label="Open Creations" title="Creations"><span aria-hidden="true">✎</span></button>
             </div>
             <div class="admin-orbit-core"><span>RIKITOISM</span></div>
@@ -151,7 +174,7 @@
   <section id="influence-editor" class="admin-card editor-panel" hidden>
     <div class="admin-toolbar"><div><h2>influences</h2><p class="admin-help">Four collections on the influences page. Deleting asks for your password.</p></div></div>
     <div class="guestbook-view-tabs influence-tabs" role="group" aria-label="Influence collections">
-      <button type="button" data-influence-tab="interest" aria-pressed="true">Core interests <span class="tab-count" data-influence-count="interest"></span></button><button type="button" data-influence-tab="playlist" aria-pressed="false">Playlists <span class="tab-count" data-influence-count="playlist"></span></button><button type="button" data-influence-tab="song" aria-pressed="false">Songs <span class="tab-count" data-influence-count="song"></span></button><button type="button" data-influence-tab="shaped" aria-pressed="false">Shaped me <span class="tab-count" data-influence-count="shaped"></span></button>
+      <button type="button" data-influence-tab="interest" aria-pressed="true">🃏 Core interests <span class="tab-count" data-influence-count="interest"></span></button><button type="button" data-influence-tab="playlist" aria-pressed="false">♪ Playlists <span class="tab-count" data-influence-count="playlist"></span></button><button type="button" data-influence-tab="song" aria-pressed="false">🎧 Songs <span class="tab-count" data-influence-count="song"></span></button><button type="button" data-influence-tab="shaped" aria-pressed="false">🍀 Shaped me <span class="tab-count" data-influence-count="shaped"></span></button>
     </div>
     
     <div class="influence-section" data-influence-section="interest">
@@ -258,7 +281,7 @@
       <form id="me-timeline-form" class="admin-form editor-form" hidden>
         <input type="hidden" name="id">
         <div class="month-year-control">
-          <div class="month-year-heading">Month and year <span class="field-note">Saved as Month Year, for example September 2014</span></div>
+          <div class="month-year-heading">Month and year</div>
           <div class="month-year-selects">
             <label><span class="sr-only">Month</span><select name="month" required aria-label="Month"><option value="">Choose month</option><option value="1">January</option><option value="2">February</option><option value="3">March</option><option value="4">April</option><option value="5">May</option><option value="6">June</option><option value="7">July</option><option value="8">August</option><option value="9">September</option><option value="10">October</option><option value="11">November</option><option value="12">December</option></select></label>
             <label><span class="sr-only">Year</span><select name="calendar_year" required aria-label="Year"></select></label>
@@ -321,6 +344,7 @@
 <script src="js/supabase-config.js"></script>
 <script src="js/supabase-client.js"></script>
 <script src="js/admin/guestbook.js"></script>
+<script src="js/admin/mobile-nav.js"></script>
 <script type="module" src="js/admin.js"></script>
 </body>
 </html>
