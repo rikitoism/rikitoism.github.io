@@ -16,6 +16,45 @@ document.addEventListener('DOMContentLoaded', async () => {
   intro.querySelectorAll('.me-intro-paragraph').forEach((paragraph, index) => {
     window.rikitoMarkdown.set(paragraph, data.intro.paragraphs[index] || '', true);
   });
+  const portraitSlot = intro.querySelector('[data-me-portrait]');
+  if (data.intro.portrait?.src) {
+    const figure = document.createElement('figure');
+    figure.className = 'me-portrait';
+    figure.id = 'me-portrait';
+    const tape = document.createElement('span');
+    tape.className = 'me-portrait-tape';
+    tape.setAttribute('aria-hidden', 'true');
+    const frame = document.createElement('div');
+    frame.className = 'me-portrait-frame';
+    const image = document.createElement('img');
+    image.src = data.intro.portrait.src;
+    image.alt = data.intro.portrait.alt || 'Portrait';
+    image.loading = 'lazy';
+    image.decoding = 'async';
+    image.width = 800;
+    image.height = 1000;
+    frame.append(image);
+    figure.append(tape, frame);
+    if (data.intro.portrait.caption) {
+      const caption = document.createElement('figcaption');
+      caption.textContent = data.intro.portrait.caption;
+      figure.append(caption);
+    }
+    portraitSlot.append(figure);
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) {
+      figure.classList.add('in');
+    } else {
+      const portraitObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in');
+            portraitObserver.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.25 });
+      portraitObserver.observe(figure);
+    }
+  }
 
   const timeline = document.querySelector('[data-me-timeline]');
   const renderTimeline = (timelineData) => {

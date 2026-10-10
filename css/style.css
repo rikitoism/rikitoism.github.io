@@ -290,8 +290,109 @@ body::before{
 .me-page .me-intro{
   display:block;
 }
+.me-page .me-intro-layout{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,280px);
+  gap:clamp(24px,4vw,48px);
+  align-items:center;
+  min-width:0;
+}
 .me-page .me-intro-copy{
   min-width:0;
+}
+.me-page .me-portrait-slot{ min-width:0; }
+.me-page .me-portrait{
+  position:relative;
+  isolation:isolate;
+  width:min(100%,280px);
+  margin:0 auto;
+  opacity:0;
+  transform:translateY(20px) rotate(2deg);
+  transition:opacity .75s ease, transform .85s cubic-bezier(.2,.8,.2,1);
+}
+.me-page .me-portrait.in{ opacity:1; transform:translateY(0) rotate(-1.5deg); }
+.me-page .me-portrait.in:hover{ transform:translateY(-4px) rotate(0deg); }
+.me-page .me-portrait::before{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  inset:0;
+  border:2px solid var(--rose);
+  border-radius:18px;
+  transform:translate(12px,12px);
+  transition:transform .4s cubic-bezier(.2,.8,.2,1);
+}
+.me-page .me-portrait:hover::before{ transform:translate(6px,6px); }
+.me-page .me-portrait::after{
+  content:"";
+  position:absolute;
+  z-index:-2;
+  width:70%;
+  aspect-ratio:1;
+  right:-8%;
+  bottom:-10%;
+  background:radial-gradient(circle,var(--mustard),transparent 70%);
+  opacity:.35;
+  filter:blur(22px);
+  animation:me-portrait-drift 7s ease-in-out infinite alternate;
+}
+@keyframes me-portrait-drift{ to{ transform:translate(-12px,-9px) scale(1.1); } }
+.me-page .me-portrait-frame{
+  position:relative;
+  overflow:hidden;
+  aspect-ratio:4/5;
+  border-radius:18px;
+  background:var(--paper);
+  box-shadow:0 18px 40px -18px rgba(0,0,0,.4);
+}
+.me-page .me-portrait-frame img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  transform:scale(1.06);
+  filter:saturate(.92) contrast(1.02);
+  transition:transform 1s cubic-bezier(.2,.8,.2,1),filter .5s;
+}
+.me-page .me-portrait.in .me-portrait-frame img{ transform:scale(1); }
+.me-page .me-portrait:hover .me-portrait-frame img{ transform:scale(1.045); filter:saturate(1.08); }
+.me-page .me-portrait-frame::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.3) 50%,transparent 65%);
+  transform:translateX(-120%);
+}
+.me-page .me-portrait.in .me-portrait-frame::after{ animation:me-portrait-sweep 1.3s .4s ease forwards; }
+@keyframes me-portrait-sweep{ to{ transform:translateX(120%); } }
+.me-page .me-portrait-tape{
+  position:absolute;
+  z-index:2;
+  top:-10px;
+  left:50%;
+  width:76px;
+  height:22px;
+  transform:translateX(-50%) rotate(-4deg);
+  background:rgba(220,177,83,.68);
+  box-shadow:0 2px 6px rgba(0,0,0,.18);
+}
+.me-page .me-portrait figcaption{
+  margin-top:16px;
+  color:var(--ink-soft);
+  text-align:center;
+  font-size:.84rem;
+  font-style:italic;
+}
+@media(max-width:760px){
+  .me-page .me-intro-layout{ grid-template-columns:minmax(0,1fr); }
+  .me-page .me-portrait{ width:min(100%,260px); }
+  .me-page .me-portrait-slot{ grid-row:1; }
+}
+@media(prefers-reduced-motion:reduce){
+  .me-page .me-portrait,.me-page .me-portrait-frame img{ transition:none; }
+  .me-page .me-portrait{ opacity:1; transform:none; }
+  .me-page .me-portrait::after,.me-page .me-portrait.in .me-portrait-frame::after{ animation:none; }
 }
 .me-page [data-me-intro] .eyebrow-tag,
 .me-page [data-me-intro] h1{
@@ -1373,10 +1474,12 @@ details.t-expand .t-more{
 .timeline-stage .timeline-end{ right:0; }
 @media (max-width:620px){
   .timeline-stage .timeline-endpoint{
-    top:0;
+    max-width:calc(50% - 12px);
+    font-size:clamp(.88rem,4vw,1.15rem);
+    white-space:nowrap;
   }
-  .timeline-stage .timeline-end{ right:auto; left:58px; }
-  .timeline-stage .timeline-end::before{ content:"→ "; }
+  .timeline-stage .timeline-start{ top:0; left:0; text-align:left; }
+  .timeline-stage .timeline-end{ top:auto; right:auto; bottom:-1.5em; left:0; text-align:left; }
 }
 /*
   Keep the endpoint labels independent from the event flex items so the
@@ -1508,7 +1611,7 @@ details.t-expand .t-more{
   .timeline-stage .timeline{
     display:block;
     min-height:0;
-    padding:40px 0 0 30px;
+    padding:40px 0 2.5em 30px;
   }
   .timeline-stage .timeline::before{
     left:8px;
@@ -1518,12 +1621,7 @@ details.t-expand .t-more{
     width:2px;
     height:auto;
   }
-  .timeline-stage .timeline::after{
-    left:30px;
-    right:auto;
-    top:0;
-    content:attr(data-start) " → " attr(data-end);
-  }
+  .timeline-stage .timeline::after{ content:none; }
   .timeline-stage .timeline li,
   .timeline-stage .timeline li:nth-child(even){
     height:150px;
