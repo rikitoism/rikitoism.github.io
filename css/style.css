@@ -1813,6 +1813,11 @@ details.t-expand .t-more{
 .creation-rich-document table{ width:100%; margin:1.2em 0; border-collapse:collapse; font-size:.92rem; }.creation-rich-document th,.creation-rich-document td{ padding:9px 12px; border:1px solid var(--line); text-align:left; vertical-align:top; }.creation-rich-document th{ background:var(--paper-3); font-weight:700; }
 .creation-rich-equation,.creation-equation,.creation-block-equation{ max-width:100%; margin:1.5em auto; overflow-x:auto; text-align:center; font-size:1.2rem; }
 .creation-rich-equation mjx-container,.creation-equation mjx-container{ display:inline-block; max-width:100%; margin:0 auto!important; }
+@media (max-width:720px){
+  .creation-entry{ padding:20px 16px 26px; }
+  .creation-body{ margin-top:32px; padding:0; }
+  .creation-rich-document{ font-size:1rem; line-height:1.7; }
+}
 /* MathJax keeps a MathML copy beside the SVG for assistive technology. Clip it
    visually so it remains available to screen readers without appearing twice. */
 mjx-container > mjx-assistive-mml{ position:absolute!important; width:1px!important; height:1px!important; padding:0!important; margin:-1px!important; overflow:hidden!important; clip:rect(0,0,0,0)!important; white-space:nowrap!important; border:0!important; }
