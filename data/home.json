@@ -30,6 +30,6 @@
     { "href": "https://www.instagram.com/rikitoism", "icon": "◎", "className": "social-instagram", "label": "instagram" },
     { "href": "https://www.youtube.com/@ispeaksoul", "icon": "▶", "className": "social-youtube", "label": "watch my creations" },
     { "href": "https://www.linkedin.com/", "icon": "in", "className": "social-linkedin", "label": "professional-ish" },
-    { "href": "https://discord.com/", "icon": "☁", "className": "social-discord", "label": "discord corner" }
+    { "href": "https://discord.gg/c2VRcbBsXK", "icon": "☁", "className": "social-discord", "label": "discord corner" }
   ]
 }
