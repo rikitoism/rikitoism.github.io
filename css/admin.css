@@ -279,6 +279,10 @@ body.creation-studio-open{ overflow:hidden; }
 .creation-widget[data-type="image"] figcaption{ width:100%; min-height:1.4em; color:var(--muted); font-size:.82rem; text-align:center; outline:none; }
 .creation-widget[data-type="image"] figcaption:empty::before{ content:attr(data-placeholder); opacity:.65; }
 .creation-widget[data-type="image"] input{ min-height:36px; font-size:.82rem; }
+.creation-widget[data-type="embed"] .creation-widget-content{ display:grid; gap:10px; }
+.creation-embed-preview{ padding:18px; border:1px dashed var(--line-strong); border-radius:9px; color:var(--muted); text-align:center; }
+.creation-embed-caption{ min-height:1.4em; padding:6px 8px; color:var(--muted); font-size:.82rem; outline:none; }
+.creation-embed-caption:empty::before{ content:attr(data-placeholder); opacity:.65; }
 .creation-widget table{ width:100%; border-collapse:collapse; }.creation-widget th,.creation-widget td{ min-width:100px; height:auto; padding:8px 10px; border:1px solid var(--line); outline:none; }
 .creation-widget th{ background:var(--surface); font-weight:700; }.creation-widget td:focus,.creation-widget th:focus{ background:var(--accent-soft); }
 .creation-details{ position:absolute; z-index:3; top:0; right:0; bottom:0; display:grid; grid-template-rows:auto minmax(0,1fr) auto; gap:12px; width:min(460px,100%); min-width:0; max-width:100%; padding:18px; overflow:hidden; border-left:1px solid var(--line); background:var(--surface); box-shadow:-16px 0 44px -30px rgba(0,0,0,.5); animation:creation-details-in .2s ease both; }

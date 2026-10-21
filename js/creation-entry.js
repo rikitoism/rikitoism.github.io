@@ -32,7 +32,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const type = block.type || 'text';
     if (type === 'document') {
       const article = document.createElement('div'); article.className = 'creation-rich-document';
-      article.innerHTML = window.rikitoMarkdown.sanitizeHtml(block.content || ''); return article;
+      article.innerHTML = window.rikitoMarkdown.sanitizeHtml(block.content || '');
+      article.querySelectorAll('.creation-rich-embed').forEach((embed) => embed.replaceWith(renderMediaEmbed(embed.dataset.provider, embed.dataset.embedUrl, embed.dataset.title || embed.textContent)));
+      return article;
     }
     const element = document.createElement(type === 'heading' ? `h${Math.min(3, Math.max(1, Number(block.level) || 2))}` : type === 'code' ? 'pre' : type === 'image' ? 'img' : 'div');
     element.className = `creation-block creation-block-${type}`;
@@ -48,8 +50,37 @@ document.addEventListener('DOMContentLoaded', async () => {
     else if (type === 'table' && Array.isArray(block.rows)) {
       const table = document.createElement('table'); block.rows.forEach((row, rowIndex) => { const tr = table.insertRow(); row.forEach((value) => { const cell = document.createElement(rowIndex ? 'td' : 'th'); cell.textContent = value; tr.append(cell); }); }); element.append(table);
     }
-    else if (type === 'embed') { const label = document.createElement('strong'); label.textContent = block.content || 'external resource'; const anchor = document.createElement('a'); anchor.href = block.url || '#'; anchor.target = '_blank'; anchor.rel = 'noopener noreferrer'; anchor.textContent = block.url ? 'open resource →' : 'resource link missing'; element.append(label, anchor); }
+    else if (type === 'embed') {
+      const media = normalizeMediaUrl(block.embedUrl || block.url, block.provider);
+      if (media) return renderMediaEmbed(media.provider, media.embedUrl, block.content);
+      element.textContent = block.content || 'Media embed unavailable.';
+    }
     else window.rikitoMarkdown.set(element, block.content || '', type === 'heading');
+    return element;
+  }
+  function normalizeMediaUrl(value, expectedProvider) {
+    try {
+      const iframeSource = String(value || '').match(/<iframe\b[^>]*\bsrc\s*=\s*["']([^"']+)["']/i)?.[1];
+      if (iframeSource) value = iframeSource;
+      const parsed = new URL(value); if (parsed.protocol !== 'https:') return null;
+      const host = parsed.hostname.toLowerCase().replace(/^www\./, '');
+      if ((!expectedProvider || expectedProvider === 'youtube') && ['youtube.com', 'm.youtube.com', 'youtu.be'].includes(host)) {
+        const id = host === 'youtu.be' ? parsed.pathname.slice(1).split('/')[0] : parsed.searchParams.get('v') || parsed.pathname.match(/^\/(?:embed|shorts)\/([^/?]+)/)?.[1];
+        return id && /^[\w-]{11}$/.test(id) ? { provider: 'youtube', embedUrl: `https://www.youtube.com/embed/${id}` } : null;
+      }
+      if ((!expectedProvider || expectedProvider === 'spotify') && host === 'open.spotify.com') {
+        const match = parsed.pathname.match(/^\/(?:embed\/)?(track|album|playlist|episode|show)\/([A-Za-z0-9]+)$/);
+        return match ? { provider: 'spotify', embedUrl: `https://open.spotify.com/embed/${match[1]}/${match[2]}` } : null;
+      }
+    } catch {}
+    return null;
+  }
+  function renderMediaEmbed(provider, embedUrl, caption) {
+    const element = document.createElement('figure'); element.className = `creation-rich-embed creation-rich-embed-${provider}`;
+    const frame = document.createElement('div'); frame.className = 'creation-embed-frame';
+    const iframe = document.createElement('iframe'); iframe.src = embedUrl; iframe.title = caption || `${provider} embed`; iframe.loading = 'lazy'; iframe.allow = provider === 'youtube' ? 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share' : 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture'; iframe.allowFullscreen = true; iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+    frame.append(iframe); element.append(frame);
+    if (caption) { const figcaption = document.createElement('figcaption'); figcaption.textContent = caption; element.append(figcaption); }
     return element;
   }
 

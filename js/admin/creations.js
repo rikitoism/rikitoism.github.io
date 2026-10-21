@@ -91,6 +91,24 @@ export function initCreationsEditor(ui) {
     entries = data || [];
     render();
   }
+  function normalizeMediaUrl(value) {
+    try {
+      const iframeSource = String(value || '').match(/<iframe\b[^>]*\bsrc\s*=\s*["']([^"']+)["']/i)?.[1];
+      if (iframeSource) value = iframeSource;
+      const parsed = new URL(value);
+      if (parsed.protocol !== 'https:') return null;
+      const host = parsed.hostname.toLowerCase().replace(/^www\./, '');
+      if (host === 'youtube.com' || host === 'm.youtube.com' || host === 'youtu.be') {
+        const id = host === 'youtu.be' ? parsed.pathname.slice(1).split('/')[0] : parsed.searchParams.get('v') || parsed.pathname.match(/^\/(?:embed|shorts)\/([^/?]+)/)?.[1];
+        return id && /^[\w-]{11}$/.test(id) ? { provider: 'youtube', embedUrl: `https://www.youtube.com/embed/${id}` } : null;
+      }
+      if (host === 'open.spotify.com') {
+        const match = parsed.pathname.match(/^\/(track|album|playlist|episode|show)\/([A-Za-z0-9]+)$/);
+        return match ? { provider: 'spotify', embedUrl: `https://open.spotify.com/embed/${match[1]}/${match[2]}` } : null;
+      }
+    } catch {}
+    return null;
+  }
 
   function render() {
     const stamp = (entry) => new Date(entry.updated_at || entry.created_at || 0).getTime();
@@ -271,6 +289,13 @@ export function initCreationsEditor(ui) {
         const table = widget.querySelector('table').cloneNode(true); table.className = 'creation-rich-table'; widget.replaceWith(table);
       } else if (type === 'divider') {
         widget.replaceWith(document.createElement('hr'));
+      } else if (type === 'embed') {
+        const embed = document.createElement('div'); embed.className = 'creation-rich-embed';
+        embed.dataset.provider = widget.dataset.provider;
+        embed.dataset.embedUrl = widget.dataset.embedUrl;
+        embed.dataset.title = widget.querySelector('.creation-embed-caption').textContent.trim();
+        embed.textContent = embed.dataset.title || `${embed.dataset.provider} embed`;
+        widget.replaceWith(embed);
       }
     });
     clone.querySelectorAll('[contenteditable], [data-editor-only]').forEach((element) => { element.removeAttribute('contenteditable'); element.removeAttribute('data-editor-only'); });
@@ -297,6 +322,9 @@ export function initCreationsEditor(ui) {
         const rows = [...table.rows].map((row) => [...row.cells].map((cell) => cell.textContent));
         table.replaceWith(createWidget('table', { rows }));
       });
+      doc.querySelectorAll('.creation-rich-embed').forEach((embed) => {
+        embed.replaceWith(createWidget('embed', { provider: embed.dataset.provider, embedUrl: embed.dataset.embedUrl, content: embed.dataset.title || embed.textContent }));
+      });
       return;
     }
     doc.replaceChildren();
@@ -304,7 +332,7 @@ export function initCreationsEditor(ui) {
       if (['code', 'equation', 'image', 'table'].includes(block.type)) { doc.append(createWidget(block.type, block), document.createElement('p')); return; }
       if (block.type === 'gallery') { [block.url, ...(block.content || '').split('\n')].filter(Boolean).forEach((url) => doc.append(createWidget('image', { url }), document.createElement('p'))); return; }
       if (block.type === 'divider') { doc.append(document.createElement('hr'), document.createElement('p')); return; }
-      if (block.type === 'embed') { const p = document.createElement('p'); const a = document.createElement('a'); a.href = block.url || '#'; a.textContent = block.content || block.url || 'link'; p.append(a); doc.append(p); return; }
+      if (block.type === 'embed') { doc.append(createWidget('embed', { provider: block.provider, embedUrl: block.embedUrl || block.url, content: block.content }), document.createElement('p')); return; }
       const level = Math.min(3, Math.max(1, Number(block.level) || 2));
       const html = block.type === 'heading' ? `<h${level}>${window.rikitoMarkdown?.renderInline(block.content || '') || escapeHtml(block.content || '')}</h${level}>` : (window.rikitoMarkdown?.render(block.content || '') || `<p>${escapeHtml(block.content || '')}</p>`);
       appendSafeMarkup(html);
@@ -317,7 +345,7 @@ export function initCreationsEditor(ui) {
   function createWidget(type, values = {}) {
     const widget = document.createElement('section'); widget.className = 'creation-widget'; widget.dataset.type = type; widget.contentEditable = 'false';
     const head = document.createElement('div'); head.className = 'creation-widget-head';
-    const label = document.createElement('span'); label.textContent = ({ code: 'Code', equation: 'LaTeX equation', image: 'Image', table: 'Table' })[type] || type;
+    const label = document.createElement('span'); label.textContent = ({ code: 'Code', equation: 'LaTeX equation', image: 'Image', table: 'Table', embed: 'Media embed' })[type] || type;
     head.append(label);
     if (type === 'code') {
       const language = document.createElement('select'); language.setAttribute('aria-label', 'Code language');
@@ -328,6 +356,10 @@ export function initCreationsEditor(ui) {
       label.textContent = language.selectedOptions[0]?.textContent || 'PYTHON';
       head.append(language);
       head.append(widgetButton('Copy', 'copy-code', 'Copy code'));
+    }
+    if (type === 'embed') {
+      widget.dataset.provider = values.provider || '';
+      widget.dataset.embedUrl = values.embedUrl || values.url || '';
     }
     if (type === 'table') {
       head.append(widgetButton('+ Row', 'row'), widgetButton('+ Column', 'column'));
@@ -341,6 +373,10 @@ export function initCreationsEditor(ui) {
     } else if (type === 'equation') {
       const textarea = document.createElement('textarea'); textarea.spellcheck = false; textarea.setAttribute('aria-label', 'LaTeX equation'); textarea.placeholder = 'E = mc^2'; textarea.value = values.content || '';
       const preview = document.createElement('div'); preview.className = 'creation-equation-preview'; preview.textContent = textarea.value || 'Equation preview'; content.append(textarea, preview);
+    } else if (type === 'embed') {
+      const preview = document.createElement('div'); preview.className = 'creation-embed-preview'; preview.textContent = values.provider ? `${values.provider} embed ready` : 'Media embed';
+      const caption = document.createElement('div'); caption.className = 'creation-embed-caption'; caption.contentEditable = 'true'; caption.dataset.placeholder = 'Add a caption'; caption.textContent = values.content || '';
+      content.append(preview, caption);
     } else if (type === 'image') {
       const imageUrl = values.url || values.src || '';
       const image = document.createElement('img'); if (imageUrl) image.src = imageUrl; image.alt = values.alt || values.content || ''; image.hidden = !imageUrl;
@@ -419,6 +455,7 @@ export function initCreationsEditor(ui) {
     else if (command === 'ol') document.execCommand('insertOrderedList');
     else if (command === 'quote') formatBlock('blockquote');
     else if (command === 'link' || command === 'image') openInsertDialog(command);
+    else if (command === 'embed') openInsertDialog(command);
     else if (['code', 'equation', 'table', 'divider'].includes(command)) insertWidget(command);
     touch();
   }
@@ -488,7 +525,7 @@ export function initCreationsEditor(ui) {
   const commands = [
     ['Text', 'Paragraph', 'p', 'paragraph normal'], ['Heading 1', 'Large section heading', 'h1', 'heading title'], ['Heading 2', 'Section heading', 'h2', 'heading'], ['Heading 3', 'Small heading', 'h3', 'heading'],
     ['Bulleted list', 'Simple list', 'ul', 'list bullet'], ['Numbered list', 'Ordered list', 'ol', 'list number'], ['Quote', 'Pull quote', 'quote', 'blockquote'],
-    ['Image', 'Upload or link an image', 'image', 'photo picture'], ['Code', 'Code block', 'code', 'snippet program'], ['Equation', 'LaTeX equation', 'equation', 'math latex'], ['Table', 'Rows and columns', 'table', 'grid'], ['Divider', 'Visual break', 'divider', 'line'], ['Link', 'Link selected text', 'link', 'url']
+    ['Image', 'Upload or link an image', 'image', 'photo picture'], ['Embed', 'YouTube or Spotify media', 'embed', 'video song spotify youtube'], ['Code', 'Code block', 'code', 'snippet program'], ['Equation', 'LaTeX equation', 'equation', 'math latex'], ['Table', 'Rows and columns', 'table', 'grid'], ['Divider', 'Visual break', 'divider', 'line'], ['Link', 'Link selected text', 'link', 'url']
   ];
   function checkSlashMenu() {
     const selection = window.getSelection(); if (!selection?.rangeCount || !selection.isCollapsed) return closeSlashMenu();
@@ -529,8 +566,10 @@ export function initCreationsEditor(ui) {
 
   function openInsertDialog(mode) {
     dialogMode = mode; closeSlashMenu();
-    $('creation-dialog-title').textContent = mode === 'link' ? 'Add a link' : 'Insert an image';
-    $('creation-upload-label').hidden = mode === 'link'; $('creation-alt-label').hidden = mode === 'link';
+    $('creation-dialog-title').textContent = mode === 'link' ? 'Add a link' : mode === 'embed' ? 'Insert a media embed' : 'Insert an image';
+    $('creation-upload-label').hidden = mode !== 'image'; $('creation-alt-label').hidden = mode === 'link';
+    $('creation-embed-help').hidden = mode !== 'embed';
+    $('creation-insert-url').placeholder = mode === 'embed' ? 'YouTube or Spotify URL' : 'https://...';
     $('creation-insert-url').value = ''; $('creation-insert-alt').value = ''; $('creation-insert-file').value = '';
     $('creation-insert-dialog').showModal(); $('creation-insert-url').focus();
   }
@@ -540,6 +579,11 @@ export function initCreationsEditor(ui) {
     if (dialogMode === 'image') {
       if (file) { setState('saving'); try { url = await uploadImage(await optimizeImage(file), 'creations'); } catch (error) { message.textContent = error.message; setState('unsaved'); return; } }
       if (url) insertWidget('image', { url, content: caption, alt: caption }); return;
+    }
+    if (dialogMode === 'embed') {
+      const media = normalizeMediaUrl(url);
+      if (!media) { message.textContent = 'Use a valid YouTube or Spotify URL.'; setState('unsaved'); return; }
+      insertWidget('embed', { ...media, content: caption }); return;
     }
     if (!url) return;
     if (!/^(https?:|mailto:|\/|#)/i.test(url)) url = `https://${url}`;

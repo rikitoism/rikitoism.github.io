@@ -18,7 +18,7 @@
     "title": "a quick tour, in case you're lost",
     "cards": [
       { "href": "me", "meta": "who even are you", "title": "I, Me & Myself", "text": "here you will find little bit of information about me, my world and what exactly i think of myself." },
-      { "href": "journal", "meta": "words, mostly unfiltered", "title": "Journal", "text": "Blogs, thoughts, perspectives and a lot of think that goes on inside my head, so if you like you can read it." },
+      { "href": "journal", "meta": "words, mostly unfiltered", "title": "Journal", "text": "Blogs, thoughts, perspectives and a lot of things that goes on inside my head, so if you like you can read it." },
       { "href": "memories", "meta": "the good, the weird", "title": "Memories", "text": "Life around me has always been interesting, and i hope it always will be, coz these memories never die(hopefully)." },
       { "href": "influences", "meta": "rabbit holes I fell into", "title": "Influences", "text": "All my life i have been obsessed over music, books, stories and movies... these are the things that shaped me for who i am today." },
       { "href": "creations", "meta": "things I've built (or broken)", "title": "Creations", "text": "That urge to make something unique, i hope i will do that someday but till then these are projects i worked on." },

@@ -45,7 +45,7 @@
   function sanitizeHtml(source) {
     const value = String(source ?? '');
     if (!window.DOMPurify?.sanitize) return escapeHtml(value);
-    return window.DOMPurify.sanitize(value, { USE_PROFILES: { html: true }, ADD_ATTR: ['class', 'data-language', 'data-tex'] });
+    return window.DOMPurify.sanitize(value, { USE_PROFILES: { html: true }, ADD_ATTR: ['class', 'data-language', 'data-tex', 'data-provider', 'data-embed-url', 'data-title'] });
   }
 
   function set(target, source, inline = false) {
