@@ -8,9 +8,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const { data, error } = await supabaseState.client
     .from('journal_entries')
-    .select('slug,title,published_at,created_at')
+    .select('slug,title,created_at')
     .eq('status', 'published')
-    .order('published_at', { ascending: false, nullsFirst: false })
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -32,7 +31,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const date = document.createElement('span');
     date.className = 'post-date';
-    date.textContent = formatDate(entry.published_at || entry.created_at);
+    date.textContent = formatDate(entry.created_at);
 
     const link = document.createElement('a');
     link.className = 'journal-title-link';

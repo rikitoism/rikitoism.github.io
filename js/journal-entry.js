@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const { data, error } = await supabaseState.client
     .from('journal_entries')
-    .select('title,body,published_at,created_at')
+    .select('title,body,created_at')
     .eq('slug', slug)
     .eq('status', 'published')
     .single();
@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const date = document.createElement('span');
   date.className = 'post-date';
-  date.textContent = new Date(data.published_at || data.created_at).toLocaleDateString(undefined, {
+  date.textContent = new Date(data.created_at).toLocaleDateString(undefined, {
     year: 'numeric', month: 'long', day: 'numeric'
   });
 
